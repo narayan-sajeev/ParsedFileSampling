@@ -4,15 +4,14 @@ import os
 import random
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 
 # Define the root directory where the parsed files are located
 ROOT = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
 
 
-# Function to get file names from a directory
-def get_fnames(DIR):
+# Function to get all file names from a directory
+def get_all_fnames(DIR):
     current = []
     files = []
     # Loop through each file in the directory
@@ -33,10 +32,19 @@ def get_fnames(DIR):
     quit()
 
 
-# Function to print a specific file name from a list of file names
-def print_fname(i):
+# Function to retrieve a specific file name from a list of file names
+def retrieve_fname_at(i):
     # list of file names to be read in
-    fnames = []
+    fnames = ['162942胡麻油专项监督抽检结果信息表.xlsx.pkl.gz', '固原市2020年监督抽检信息.xlsx.pkl.gz',
+              '固原市市场监督管理局2020年食品_安全监督抽检信息（市抽）.xls.pkl.gz',
+              '固原市市场监督管理局2020年食品安全监督抽检信息（市抽）.xls.pkl.gz',
+              '固原市市场监督管理局2021年食品安全_监督抽检结果信息表.xlsx.pkl.gz',
+              '固原市市场监督管理局经济开发区分局2021年食品安全监督抽检样品信息表（国测食用农产品）.xlsx.pkl.gz',
+              '固原市市场监督管理局经济开发区分局2021年食品安全监督抽检样品信息表（菲杰特_市级抽检）.xlsx.pkl.gz',
+              '固原市经济开发区2020年食品安全监督抽检信息（县抽）.xls.pkl.gz',
+              '固原市经济开发区2020年食品安全监督抽检信息（食用农产品——县抽）.xls.pkl.gz',
+              '固原市经济开发区2020年食品安全监督抽检（县抽）.xls.pkl.gz',
+              '固原市经济开发区2020年食品安全监督抽检（县抽）信息.xls.pkl.gz', '胡麻油专项监督抽检结果信息表.xlsx.pkl.gz']
 
     # select the filename from the list
     fname = fnames[i]
@@ -201,7 +209,7 @@ def drop_columns(df, col_headers):
 
     # Remove unnecessary column headers
     for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
-              '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期']:
+              '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序']:
         try:
             col_headers.remove(_)
         except:
@@ -232,15 +240,16 @@ def get_path(dir, fname):
 
 # Function to print the dataframe
 def print_df(dir, df, fname):
-    # Print the file path and number of rows in the dataframe
-    print(get_path(dir, fname).split(ROOT)[-1])
+    # Print the file path
+    s = 'open %s' % get_path(dir, fname)
+    print(s)
 
     # If the dataframe has no columns or only has the inspection results column, quit
     if len(df.columns) < 1 or list(df.columns) == ['inspection_results']:
         quit()
 
     # Open the file
-    os.system('open %s' % get_path(dir, fname))
+    os.system(s)
 
     # Print first few rows of the dataframe
     newline()
@@ -255,16 +264,15 @@ def print_df(dir, df, fname):
         print(df.tail(len(df) - 5))
 
 
-# Function to read the raw excel file
-def read_excel(dir, fname):
-    # Read the raw excel file
-    df = pd.read_excel(get_path(dir, fname), skiprows=3)
-    # If the dataframe has less than 4 rows, skip fewer rows
-    if len(df) < 4:
-        df = pd.read_excel(get_path(dir, fname), skiprows=2)
-    # Remove columns that have all nuber values
-    df = df.select_dtypes(exclude=[np.number])
-    return df
+# Function to read the raw Excel file
+def read_excel(dir, fname, df):
+    # Read the raw Excel file
+    raw_df = pd.read_excel(get_path(dir, fname))
+    # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
+    diff = len(raw_df) - len(df)
+    # Skip the first few rows of the raw dataframe
+    raw_df = pd.read_excel(get_path(dir, fname), skiprows=diff)
+    return raw_df
 
 
 # Function to process the date column
@@ -319,19 +327,20 @@ def drop_common(df, raw_df):
 
 
 # Define the directory where the parsed files are located
-dir = ROOT + 'Ningxia_Ningxia_msb_20220708'
+dir = ROOT + 'Ningxia_Ningxia_msb_20220814'
 
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
 # Get the file name from the list of file names
-fname = print_fname(0)
+fname = retrieve_fname_at(0)
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
 
 # Get the column headers from the dataframe
-col_headers = []
+col_headers = ['序', '号', '抽样编号', '样品名称', '生产企业', '名称', '生产企业地址', '被抽样单位', '名称',
+               '被抽样单位', '地址', '规格', '生产日期', '抽样单位', '检测机构', '检测', '结果', '不合格项目', '备 注']
 
 # Check substrings for unmatched columns
 review_cols = substring(df, get_known_cols(), col_headers)
@@ -339,8 +348,8 @@ review_cols = substring(df, get_known_cols(), col_headers)
 # Drop unnecessary columns from the dataframe
 df = drop_columns(df, review_cols)
 
-# Read the raw excel file
-raw_df = read_excel(dir, fname)
+# Read the raw Excel file
+raw_df = read_excel(dir, fname, df)
 
 # Drop common columns from the dataframe
 df = drop_common(df, raw_df)
