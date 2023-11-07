@@ -32,25 +32,6 @@ def get_all_fnames(DIR):
     quit()
 
 
-# Function to retrieve a specific file name from a list of file names
-def retrieve_fname_at(i):
-    # list of file names to be read in
-    fnames = ['162942胡麻油专项监督抽检结果信息表.xlsx.pkl.gz', '固原市2020年监督抽检信息.xlsx.pkl.gz',
-              '固原市市场监督管理局2020年食品_安全监督抽检信息（市抽）.xls.pkl.gz',
-              '固原市市场监督管理局2020年食品安全监督抽检信息（市抽）.xls.pkl.gz',
-              '固原市市场监督管理局2021年食品安全_监督抽检结果信息表.xlsx.pkl.gz',
-              '固原市市场监督管理局经济开发区分局2021年食品安全监督抽检样品信息表（国测食用农产品）.xlsx.pkl.gz',
-              '固原市市场监督管理局经济开发区分局2021年食品安全监督抽检样品信息表（菲杰特_市级抽检）.xlsx.pkl.gz',
-              '固原市经济开发区2020年食品安全监督抽检信息（县抽）.xls.pkl.gz',
-              '固原市经济开发区2020年食品安全监督抽检信息（食用农产品——县抽）.xls.pkl.gz',
-              '固原市经济开发区2020年食品安全监督抽检（县抽）.xls.pkl.gz',
-              '固原市经济开发区2020年食品安全监督抽检（县抽）信息.xls.pkl.gz', '胡麻油专项监督抽检结果信息表.xlsx.pkl.gz']
-
-    # select the filename from the list
-    fname = fnames[i]
-    return fname
-
-
 # Function to read a dataframe from a pickle file
 def get_df(DIR, fname):
     # read in the first file from the list using pandas
@@ -239,13 +220,18 @@ def get_path(dir, fname):
 
 
 # Function to print the dataframe
-def print_df(dir, df, fname):
+def print_df(df):
     # Print the file path
     s = 'open %s' % get_path(dir, fname)
-    print(s)
+    txt = s.split(ROOT)[-1]
+    txt = s.split('/')[-1]
+    print(txt)
 
-    # If the dataframe has no columns or only has the inspection results column, quit
-    if len(df.columns) < 1 or list(df.columns) == ['inspection_results']:
+    # Drop columns that have all duplicate values
+    no_dup_df = df.loc[:, df.nunique() != 1]
+
+    # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
+    if len(df.columns) < 1 or list(df.columns) == ['inspection_results'] or len(no_dup_df.columns) < 1:
         quit()
 
     # Open the file
@@ -254,7 +240,6 @@ def print_df(dir, df, fname):
     # Print first few rows of the dataframe
     newline()
     print(df.head())
-    hr()
 
     # Print last few rows of the dataframe
     if len(df) > 10:
@@ -262,6 +247,8 @@ def print_df(dir, df, fname):
 
     elif len(df) > 5:
         print(df.tail(len(df) - 5))
+
+    hr()
 
 
 # Function to read the raw Excel file
@@ -272,6 +259,7 @@ def read_excel(dir, fname, df):
     diff = len(raw_df) - len(df)
     # Skip the first few rows of the raw dataframe
     raw_df = pd.read_excel(get_path(dir, fname), skiprows=diff)
+
     return raw_df
 
 
@@ -291,6 +279,7 @@ def process_date(c):
 def drop_common(df, raw_df):
     # Production date columns
     dates = ['生产日期/批号', '生产日期']
+
     # Process the production date columns
     for col in dates:
         # Try to process the date column
@@ -299,13 +288,14 @@ def drop_common(df, raw_df):
             raw_df[col] = raw_df[col].apply(process_date)
         except:
             pass
+
     drop_cols = []
 
     # Drop columns that are common to both the parsed and raw dataframes
     for col1 in df.columns:
         for col2 in raw_df.columns:
             # If the cells are the same, drop the column
-            if (df[col1] == raw_df[col2]).all():
+            if df[col1].equals(raw_df[col2]):
                 # Add the column to the list of columns to be dropped
                 drop_cols.append(col1)
                 break
@@ -315,7 +305,7 @@ def drop_common(df, raw_df):
 
     # If the number of rows in the parsed dataframe is the same as the number of rows in the raw dataframe
     if len(df) == len(raw_df):
-        print('0/%s' % len(df))
+        print(len(df))
 
     # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
     else:
@@ -326,21 +316,36 @@ def drop_common(df, raw_df):
     return df
 
 
+# list of file names to be read in
+fnames = ['04093722.调味品监督抽检食品合格信息.xls.pkl.gz', '0411457.方便食品监督抽检食品合格信息.xls.pkl.gz',
+          '0412342.饼干监督抽检合格食品信息.xls.pkl.gz', '051355○_10.乳制品监督抽检产品合格信息.xlsx.pkl.gz',
+          '051849○_4.糕点监督抽检合格产品信息.xlsx.pkl.gz', '051910○_8.调味品监督抽检合格产品信息.xlsx.pkl.gz',
+          '11.食糖监督抽检合格食品信息.xls.pkl.gz', '12.方便食品监督抽检食品合格信息.xls.pkl.gz',
+          '14.保健食品抽检合格食品信息.xls.pkl.gz', '14.肉制品监督抽检食品合格信息.xls.pkl.gz',
+          '15.乳制品监督抽检食品合格信息.xls.pkl.gz', '2.食用农产品监督抽检食品合格信息.xls.pkl.gz',
+          '20.调味品监督抽检食品合格信息.xls.pkl.gz', '20.食品添加剂监督抽检产品合格信息.xls.pkl.gz',
+          '5.调味品监督抽检不符合食品安全标准食品信息.xls.pkl.gz', '7.淀粉及淀粉制品监督抽检合格食品信息.xls.pkl.gz',
+          '7.罐头监督抽检合格食品信息.xls.pkl.gz', '7.食用农产品监督抽检食品合格信息.xls.pkl.gz',
+          '8.粮食加工品监督抽检食品合格信息.xls.pkl.gz', '○_13.蜂蜜监督抽检合格产品信息.xlsx.pkl.gz',
+          '○_14.蜂产品监督抽检合格产品信息.xlsx.pkl.gz', '○_15.肉制品监督抽检产品合格信息.xlsx.pkl.gz',
+          '○_15.食用农食品监督抽检食品合格信息.xls.pkl.gz', '○_15_食糖监督抽检产品合格信息.xls.pkl.gz',
+          '○_17.调味品监督抽检合格产品信息.xls.pkl.gz']
+
+# Get the column headers from the dataframe
+col_headers = ['序号', '抽样编号', '标称生产企业名称', '标称生产企业地址', '被抽样单位名称', '被抽样单位地址',
+               '被抽样单位省份', '食品名称', '规格型号', '生产日期/批号', '分类', '公告号', '公告日期',
+               '任务来源/项目名称', '备注']
+
 # Define the directory where the parsed files are located
-dir = ROOT + 'Ningxia_Ningxia_msb_20220814'
+dir = ROOT + 'Qinghai_Qinghai_msb_20220729'
 
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-# Get the file name from the list of file names
-fname = retrieve_fname_at(0)
+fname = fnames[4]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
-
-# Get the column headers from the dataframe
-col_headers = ['序', '号', '抽样编号', '样品名称', '生产企业', '名称', '生产企业地址', '被抽样单位', '名称',
-               '被抽样单位', '地址', '规格', '生产日期', '抽样单位', '检测机构', '检测', '结果', '不合格项目', '备 注']
 
 # Check substrings for unmatched columns
 review_cols = substring(df, get_known_cols(), col_headers)
@@ -355,4 +360,4 @@ raw_df = read_excel(dir, fname, df)
 df = drop_common(df, raw_df)
 
 # Print the dataframe
-print_df(dir, df, fname)
+print_df(df)
