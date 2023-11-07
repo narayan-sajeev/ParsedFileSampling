@@ -2,7 +2,9 @@
 import json
 import os
 import random
+from datetime import datetime
 
+import numpy as np
 import pandas as pd
 
 # Define the root directory where the parsed files are located
@@ -18,7 +20,7 @@ def get_fnames(DIR):
         # Check if the file is an Excel file and if it's not already in the list of files
         is_xl = file.endswith(('.xlsx', '.xls'))
         pkl = file + '.pkl.gz'
-        is_food = not any([i in file for i in ['业', '商']])
+        is_food = not any([i in file for i in ['业', '商', '饮', '酒']])
         if is_xl and file not in current and pkl in os.listdir(DIR) and is_food:
             files.append(file)
 
@@ -34,17 +36,7 @@ def get_fnames(DIR):
 # Function to print a specific file name from a list of file names
 def print_fname(i):
     # list of file names to be read in
-    fnames = ['041821不合格产品信息.xls.pkl.gz', '041838合格产品信息.xls.pkl.gz',
-              '041849附件3_合格产品信息.xlsx.pkl.gz', '041930不合格产品信息.xls.pkl.gz',
-              '042127不合格产品信息.xls.pkl.gz', '042146附件3_合格产品信息.xlsx.pkl.gz',
-              '042331不合格产品信息.xls.pkl.gz', '042425合格产品信息.xls.pkl.gz', '042448不合格产品信息.xls.pkl.gz',
-              '042526不合格产品信息.xls.pkl.gz', '042536不合格产品信息.xls.pkl.gz', '042602不合格产品信息.xls.pkl.gz',
-              '042654合格产品信息.xls.pkl.gz', '0427503、合格产品信息.xls.pkl.gz', '0428072、不合格产品信息.xlsx.pkl.gz',
-              '042858不合格产品信息.xls.pkl.gz', '0429152、不合格产品信息.xlsx.pkl.gz', '042937合格产品信息.xls.pkl.gz',
-              '0430442、不合格产品信息.xlsx.pkl.gz', '043101不合格产品信息.xls.pkl.gz',
-              '0432462、不合格产品信息.xls.pkl.gz', '0433012、不合格产品信息.xls.pkl.gz',
-              '0433202、不合格产品信息.xls.pkl.gz', '0433352、不合格产品信息.xls.pkl.gz',
-              '2、月饼专项监督抽检不合格产品信息.xls.pkl.gz']
+    fnames = []
 
     # select the filename from the list
     fname = fnames[i]
@@ -86,12 +78,6 @@ def substr_check(substr_sets, k):
 def substring(df, known_cols, col_headers):
     # Clean up the column headers
     col_headers = clean(col_headers)
-
-    # Try to remove '判定依据' from the column headers
-    try:
-        col_headers.remove('判定依据')
-    except:
-        pass
 
     # dictionary of substrings to check for in column headers
     substr_sets = {
@@ -215,7 +201,7 @@ def drop_columns(df, col_headers):
 
     # Remove unnecessary column headers
     for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
-              '公告网址链接', '产品具体名称', '销售单位/电商']:
+              '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期']:
         try:
             col_headers.remove(_)
         except:
@@ -239,66 +225,101 @@ def newline():
     print()
 
 
+# Function to get the file path
+def get_path(dir, fname):
+    return '%s/%s' % (dir, fname.split('.pkl')[0])
+
+
 # Function to print the dataframe
-def print_df(DIR, df, fname):
-    # Replace spaces in the directory path with '\ '
-    DIR = DIR.replace(' ', '\ ')
-
-    # Construct the full directory path
-    full_dir = '%s/%s' % (DIR, fname)
-    full_dir = full_dir.split('.pkl')[0]
-
-    # Open the file in the default application
-    s = 'open %s' % full_dir
-    os.system(s)
-
+def print_df(dir, df, fname):
     # Print the file path and number of rows in the dataframe
-    print(s.split(ROOT)[-1])
-    print('Rows:', len(df))
+    print(get_path(dir, fname).split(ROOT)[-1])
+
+    # If the dataframe has no columns or only has the inspection results column, quit
+    if len(df.columns) < 1 or list(df.columns) == ['inspection_results']:
+        quit()
+
+    # Open the file
+    os.system('open %s' % get_path(dir, fname))
 
     # Print first few rows of the dataframe
     newline()
     print(df.head())
     hr()
 
+    # Print last few rows of the dataframe
     if len(df) > 10:
         print(df.tail())
 
-        # Check for duplicate rows
-        dup_df = df[df.duplicated(keep=False)]
-
-        # If there are duplicate rows, print them
-        if len(dup_df) > 0:
-            hr()
-            print('Duplicates:', len(dup_df))
-            print(dup_df)
-
-        # Check for empty columns
-        empty_cols = df.columns[df.isnull().any()]
-
-        # If there are empty columns, print them
-        if len(empty_cols) > 0:
-            hr()
-            print('Empty:', len(empty_cols))
-            print(df[empty_cols])
-
-        # If 'adulterant' is a column in the dataframe, check for null values
-        if 'adulterant' in df.columns:
-
-            df_adulterant_none = df[df['adulterant'].isnull()]
-
-            # If there are rows where 'adulterant' is null, print them
-            if len(df_adulterant_none) > 0:
-                hr()
-                print('Adulterant None:', len(df_adulterant_none))
-                print(df_adulterant_none)
-
-    else:
+    elif len(df) > 5:
         print(df.tail(len(df) - 5))
 
 
+# Function to read the raw excel file
+def read_excel(dir, fname):
+    # Read the raw excel file
+    df = pd.read_excel(get_path(dir, fname), skiprows=3)
+    # If the dataframe has less than 4 rows, skip fewer rows
+    if len(df) < 4:
+        df = pd.read_excel(get_path(dir, fname), skiprows=2)
+    # Remove columns that have all nuber values
+    df = df.select_dtypes(exclude=[np.number])
+    return df
+
+
+# Function to process the date column
+def process_date(c):
+    # Convert the date column to a string
+    c = str(c)[:10].replace('//', '').replace('/', '-').replace('.', '-')
+    # Format the date column
+    try:
+        return datetime.strptime(c.split()[0], '%Y-%m-%d').strftime('%Y-%m-%d')
+    # If the date column is empty, return the original value
+    except ValueError:
+        return c
+
+
+# Function to drop common columns
+def drop_common(df, raw_df):
+    # Production date columns
+    dates = ['生产日期/批号', '生产日期']
+    # Process the production date columns
+    for col in dates:
+        # Try to process the date column
+        try:
+            # Apply the process_date function to the date column
+            raw_df[col] = raw_df[col].apply(process_date)
+        except:
+            pass
+    drop_cols = []
+
+    # Drop columns that are common to both the parsed and raw dataframes
+    for col1 in df.columns:
+        for col2 in raw_df.columns:
+            # If the cells are the same, drop the column
+            if (df[col1] == raw_df[col2]).all():
+                # Add the column to the list of columns to be dropped
+                drop_cols.append(col1)
+                break
+
+    # Drop the columns from the dataframe
+    df = df.drop(drop_cols, axis=1)
+
+    # If the number of rows in the parsed dataframe is the same as the number of rows in the raw dataframe
+    if len(df) == len(raw_df):
+        print('0/%s' % len(df))
+
+    # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
+    else:
+        # Print the number of rows in the parsed and raw dataframes
+        print('Rows in Parsed:', len(df))
+        print('Rows in Raw:', len(raw_df))
+
+    return df
+
+
 # Define the directory where the parsed files are located
-dir = ROOT + 'Jiangsu_Jiangsu_msb_20220815'
+dir = ROOT + 'Ningxia_Ningxia_msb_20220708'
 
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
@@ -310,15 +331,19 @@ fname = print_fname(0)
 df = get_df(dir, fname)
 
 # Get the column headers from the dataframe
-col_headers = ['序号', '标称生产企业名称', '标称生产企业地址', '被抽样单位名称', '被抽样单位地址', '食品名称',
-               '规格型号', '商标', '生产日期/批号', '不合格项目║检验结果║标准值', '分类', '任务来源', '检验机构',
-               '备注']
+col_headers = []
 
 # Check substrings for unmatched columns
 review_cols = substring(df, get_known_cols(), col_headers)
 
 # Drop unnecessary columns from the dataframe
 df = drop_columns(df, review_cols)
+
+# Read the raw excel file
+raw_df = read_excel(dir, fname)
+
+# Drop common columns from the dataframe
+df = drop_common(df, raw_df)
 
 # Print the dataframe
 print_df(dir, df, fname)
