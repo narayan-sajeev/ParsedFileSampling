@@ -8,6 +8,8 @@ import pandas as pd
 
 # Define the root directory where the parsed files are located
 ROOT = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
+# Production date columns
+dates = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号']
 
 
 # Function to get all file names from a directory
@@ -67,6 +69,11 @@ def substr_check(substr_sets, k):
 def substring(df, known_cols, col_headers):
     # Clean up the column headers
     col_headers = clean(col_headers)
+
+    try:
+        col_headers.remove('抽查结果')
+    except:
+        pass
 
     # dictionary of substrings to check for in column headers
     substr_sets = {
@@ -190,7 +197,8 @@ def drop_columns(df, col_headers):
 
     # Remove unnecessary column headers
     for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
-              '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序']:
+              '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
+              '统一社会信用代码']:
         try:
             col_headers.remove(_)
         except:
@@ -209,44 +217,52 @@ def hr():
     print('*' * 300)
 
 
-# Function to print a newline
-def newline():
-    print()
-
-
 # Function to get the file path
 def get_path(dir, fname):
     return '%s/%s' % (dir, fname.split('.pkl')[0])
 
 
 # Function to print the dataframe
-def print_df(df):
+def print_df(df, raw_df):
     # Print the file path
     s = 'open %s' % get_path(dir, fname)
-    txt = s.split(ROOT)[-1]
     txt = s.split('/')[-1]
     print(txt)
 
     # Drop columns that have all duplicate values
     no_dup_df = df.loc[:, df.nunique() != 1]
 
+    cols = list(df.columns)
+
     # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
-    if len(df.columns) < 1 or list(df.columns) == ['inspection_results'] or len(no_dup_df.columns) < 1:
+    if len(cols) < 1 or cols == ['inspection_results'] or len(no_dup_df.columns) < 1:
         quit()
+
+    df = no_dup_df
+
+    if cols == ['production_date']:
+        for date in dates:
+            try:
+                raw_df = pd.DataFrame(raw_df[date])
+            except:
+                pass
 
     # Open the file
     os.system(s)
 
     # Print first few rows of the dataframe
-    newline()
+    print()
     print(df.head())
+    print(raw_df.head())
 
     # Print last few rows of the dataframe
     if len(df) > 10:
         print(df.tail())
+        print(raw_df.tail())
 
     elif len(df) > 5:
         print(df.tail(len(df) - 5))
+        print(raw_df.tail(len(df) - 5))
 
     hr()
 
@@ -259,27 +275,43 @@ def read_excel(dir, fname, df):
     diff = len(raw_df) - len(df)
     # Skip the first few rows of the raw dataframe
     raw_df = pd.read_excel(get_path(dir, fname), skiprows=diff)
+    raw_df = raw_df[~raw_df.apply(lambda row: row.astype(str).str.contains('标称生产企业名称').any(), axis=1)]
 
     return raw_df
 
 
 # Function to process the date column
-def process_date(c):
+def process_date(date):
+    # If the date column is empty, return None
+    if date in ['/', '-']:
+        return None
     # Convert the date column to a string
-    c = str(c)[:10].replace('//', '').replace('/', '-').replace('.', '-')
+    date = str(date)[:10].replace('//', '').replace('/', '-').replace('.', '-')
+    # If the last character is a '-', remove it
+    if date[-1] == '-':
+        date = date[:-1]
+    # If the last character is a '-', remove it
+    if '～' in date:
+        date = date.split('～')[0]
+    date = date.split()[0]
+    # If the date is an integer
+    if date.isdigit():
+        try:
+            # Convert the date to a datetime object
+            return datetime.strptime(date, '%Y%m%d').strftime('%Y-%m-%d')
+        except:
+            return None
     # Format the date column
+    date = '-'.join(date.split('-')[:3])
     try:
-        return datetime.strptime(c.split()[0], '%Y-%m-%d').strftime('%Y-%m-%d')
-    # If the date column is empty, return the original value
+        return datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
+    # Return the original value
     except ValueError:
-        return c
+        return date
 
 
 # Function to drop common columns
 def drop_common(df, raw_df):
-    # Production date columns
-    dates = ['生产日期/批号', '生产日期']
-
     # Process the production date columns
     for col in dates:
         # Try to process the date column
@@ -317,32 +349,27 @@ def drop_common(df, raw_df):
 
 
 # list of file names to be read in
-fnames = ['04093722.调味品监督抽检食品合格信息.xls.pkl.gz', '0411457.方便食品监督抽检食品合格信息.xls.pkl.gz',
-          '0412342.饼干监督抽检合格食品信息.xls.pkl.gz', '051355○_10.乳制品监督抽检产品合格信息.xlsx.pkl.gz',
-          '051849○_4.糕点监督抽检合格产品信息.xlsx.pkl.gz', '051910○_8.调味品监督抽检合格产品信息.xlsx.pkl.gz',
-          '11.食糖监督抽检合格食品信息.xls.pkl.gz', '12.方便食品监督抽检食品合格信息.xls.pkl.gz',
-          '14.保健食品抽检合格食品信息.xls.pkl.gz', '14.肉制品监督抽检食品合格信息.xls.pkl.gz',
-          '15.乳制品监督抽检食品合格信息.xls.pkl.gz', '2.食用农产品监督抽检食品合格信息.xls.pkl.gz',
-          '20.调味品监督抽检食品合格信息.xls.pkl.gz', '20.食品添加剂监督抽检产品合格信息.xls.pkl.gz',
-          '5.调味品监督抽检不符合食品安全标准食品信息.xls.pkl.gz', '7.淀粉及淀粉制品监督抽检合格食品信息.xls.pkl.gz',
-          '7.罐头监督抽检合格食品信息.xls.pkl.gz', '7.食用农产品监督抽检食品合格信息.xls.pkl.gz',
-          '8.粮食加工品监督抽检食品合格信息.xls.pkl.gz', '○_13.蜂蜜监督抽检合格产品信息.xlsx.pkl.gz',
-          '○_14.蜂产品监督抽检合格产品信息.xlsx.pkl.gz', '○_15.肉制品监督抽检产品合格信息.xlsx.pkl.gz',
-          '○_15.食用农食品监督抽检食品合格信息.xls.pkl.gz', '○_15_食糖监督抽检产品合格信息.xls.pkl.gz',
-          '○_17.调味品监督抽检合格产品信息.xls.pkl.gz']
+fnames = ['002049附件1.xlsx.pkl.gz', '002144附件1.xls.pkl.gz', '003001附件1.xls.pkl.gz', '003250附件1.xls.pkl.gz',
+          '003256附件1.xls.pkl.gz', '004900附件2.xls.pkl.gz', '005125附件1.xls.pkl.gz', '005811附件1.xls.pkl.gz',
+          '010042附件1.xls.pkl.gz', '010405附件1.xls.pkl.gz', '0106503.食品抽检不合格产品信息.xlsx.pkl.gz',
+          '010802附件1.xls.pkl.gz', '1.婴幼儿配方食品抽检合格产品信息.xlsx.pkl.gz',
+          '1.食品抽检合格产品信息-15.xlsx.pkl.gz', '2.食品抽检不合格产品信息-15.xlsx.pkl.gz',
+          '2.食品抽检不合格产品信息-18.xlsx.pkl.gz', '2.食品抽检合格产品信息-3.xls.pkl.gz',
+          '2.食品抽检合格产品信息-49.xlsx.pkl.gz', '2.食品抽检合格产品信息-59.xls.pkl.gz',
+          '2.食品抽检合格产品信息-70.xls.pkl.gz', '2_食品抽检合格产品信息.xlsx.pkl.gz',
+          '3.食品抽检不合格产品信息-28.xlsx.pkl.gz', '冷柜1.xls.pkl.gz', '电动1.xls.pkl.gz', '附件2.xlsx.pkl.gz']
 
 # Get the column headers from the dataframe
-col_headers = ['序号', '抽样编号', '标称生产企业名称', '标称生产企业地址', '被抽样单位名称', '被抽样单位地址',
-               '被抽样单位省份', '食品名称', '规格型号', '生产日期/批号', '分类', '公告号', '公告日期',
-               '任务来源/项目名称', '备注']
+col_headers = ['序号', '产品名称', '抽查领域', '企业名称', '统一社会信用代码', '标称生产企业名称', '生产日期或批号',
+               '规格型号', '商标', '抽查结果', '承检单位']
 
 # Define the directory where the parsed files are located
-dir = ROOT + 'Qinghai_Qinghai_msb_20220729'
+dir = ROOT + 'Shandong_Shandong_msb_20220707'
 
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[4]
+fname = fnames[11]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
@@ -360,4 +387,4 @@ raw_df = read_excel(dir, fname, df)
 df = drop_common(df, raw_df)
 
 # Print the dataframe
-print_df(df)
+print_df(df, raw_df)
