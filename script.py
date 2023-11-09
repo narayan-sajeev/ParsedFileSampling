@@ -256,18 +256,21 @@ def print_df(df, raw_df):
     # Print first few rows of the dataframe
     print()
     print(df.head())
+    hr()
     print(raw_df.head())
 
     # Print last few rows of the dataframe
     if len(df) > 10:
+        hr()
         print(df.tail())
+        hr()
         print(raw_df.tail())
 
     elif len(df) > 5:
+        hr()
         print(df.tail(len(df) - 5))
+        hr()
         print(raw_df.tail(len(df) - 5))
-
-    hr()
 
 
 # Function to read the raw Excel file
