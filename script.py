@@ -9,7 +9,7 @@ import pandas as pd
 # Define the root directory where the parsed files are located
 ROOT = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
 # Production date columns
-dates = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号']
+dates = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号']
 
 
 # Function to get all file names from a directory
@@ -198,7 +198,7 @@ def drop_columns(df, col_headers):
     # Remove unnecessary column headers
     for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
               '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
-              '统一社会信用代码']:
+              '统一社会信用代码', '产品细类']:
         try:
             col_headers.remove(_)
         except:
@@ -240,10 +240,13 @@ def print_df(df, raw_df):
 
     df = no_dup_df
 
+    cols = list(df.columns)
+
     if cols == ['production_date']:
         for date in dates:
             try:
                 raw_df = pd.DataFrame(raw_df[date])
+                break
             except:
                 pass
 
@@ -275,8 +278,11 @@ def read_excel(dir, fname, df):
     diff = len(raw_df) - len(df)
     # Skip the first few rows of the raw dataframe
     raw_df = pd.read_excel(get_path(dir, fname), skiprows=diff)
-    raw_df = raw_df[~raw_df.apply(lambda row: row.astype(str).str.contains('标称生产企业名称').any(), axis=1)]
-
+    mask = (raw_df == '序号').any(axis=1)
+    if mask.any():  # Check if '序号' exists in the DataFrame
+        index_to_drop = df[mask].index[0]  # Get the index of the first occurrence
+        raw_df = df.loc[index_to_drop + 1:]
+    raw_df = raw_df.applymap(lambda x: '/' if pd.isnull(x) else x)
     return raw_df
 
 
@@ -321,6 +327,13 @@ def drop_common(df, raw_df):
         except:
             pass
 
+    df = df.applymap(lambda x: '/' if pd.isnull(x) else x)
+    df = df.applymap(lambda x: None if x == '/' else x)
+
+    raw_df = raw_df.applymap(lambda x: '/' if pd.isnull(x) else x)
+    raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
+    raw_df = raw_df.replace({pd.NaT: None})
+
     drop_cols = []
 
     # Drop columns that are common to both the parsed and raw dataframes
@@ -331,6 +344,8 @@ def drop_common(df, raw_df):
                 # Add the column to the list of columns to be dropped
                 drop_cols.append(col1)
                 break
+
+    # quit()
 
     # Drop the columns from the dataframe
     df = df.drop(drop_cols, axis=1)
@@ -345,7 +360,7 @@ def drop_common(df, raw_df):
         print('Rows in Parsed:', len(df))
         print('Rows in Raw:', len(raw_df))
 
-    return df
+    return raw_df, df
 
 
 # list of file names to be read in
@@ -360,8 +375,9 @@ fnames = ['002049附件1.xlsx.pkl.gz', '002144附件1.xls.pkl.gz', '003001附件
           '3.食品抽检不合格产品信息-28.xlsx.pkl.gz', '冷柜1.xls.pkl.gz', '电动1.xls.pkl.gz', '附件2.xlsx.pkl.gz']
 
 # Get the column headers from the dataframe
-col_headers = ['序号', '产品名称', '抽查领域', '企业名称', '统一社会信用代码', '标称生产企业名称', '生产日期或批号',
-               '规格型号', '商标', '抽查结果', '承检单位']
+col_headers = ['序号', '食品名称', '标称生产（养殖）企业名称', '标称生产（养殖）企业地址', '被抽样单位名称',
+               '被抽样单位地址', '规格型号', '商标', '生产(购进或检疫）日期/批号', '不合格项目||检验结果||单位||标准值',
+               '分类', '品种', '公告号', '公告日期', '检验机构', '备注']
 
 # Define the directory where the parsed files are located
 dir = ROOT + 'Shandong_Shandong_msb_20220707'
@@ -369,7 +385,7 @@ dir = ROOT + 'Shandong_Shandong_msb_20220707'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[11]
+fname = fnames[14]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
@@ -384,7 +400,7 @@ df = drop_columns(df, review_cols)
 raw_df = read_excel(dir, fname, df)
 
 # Drop common columns from the dataframe
-df = drop_common(df, raw_df)
+raw_df, df = drop_common(df, raw_df)
 
 # Print the dataframe
 print_df(df, raw_df)
