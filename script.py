@@ -229,7 +229,7 @@ def print_df(df, raw_df):
     txt = s.split('/')[-1]
     print(txt)
 
-    # Drop columns that have all duplicate values
+    # Drop columns that have all duplicate rows
     no_dup_df = df.loc[:, df.nunique() != 1]
 
     cols = list(df.columns)
@@ -347,8 +347,6 @@ def drop_common(df, raw_df):
                 # Add the column to the list of columns to be dropped
                 drop_cols.append(col1)
                 break
-
-    # quit()
 
     # Drop the columns from the dataframe
     df = df.drop(drop_cols, axis=1)
