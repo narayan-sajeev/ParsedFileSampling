@@ -198,7 +198,7 @@ def drop_columns(df, col_headers):
     # Remove unnecessary column headers
     for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
               '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
-              '统一社会信用代码', '产品细类']:
+              '统一社会信用代码', '产品细类', '企业所在市']:
         try:
             col_headers.remove(_)
         except:
@@ -272,7 +272,7 @@ def read_excel(dir, fname, df):
     # Read the raw Excel file
     raw_df = pd.read_excel(get_path(dir, fname))
     # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
-    diff = len(raw_df) - len(df)
+    diff = len(raw_df) - num_rows(df)
     # Skip the first few rows of the raw dataframe
     raw_df = pd.read_excel(get_path(dir, fname), skiprows=diff)
     mask = (raw_df == '序号').any(axis=1)
@@ -313,6 +313,14 @@ def process_date(date):
         return date
 
 
+# Count the number of rows in the dataframe
+def num_rows(df):
+    try:
+        return df['failing_results'].nunique()
+    except:
+        return len(df)
+
+
 # Function to drop common columns
 def drop_common(df, raw_df):
     # Process the production date columns
@@ -324,9 +332,11 @@ def drop_common(df, raw_df):
         except:
             pass
 
+    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     df = df.applymap(lambda x: '/' if pd.isnull(x) else x)
     df = df.applymap(lambda x: None if x == '/' else x)
 
+    raw_df = raw_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     raw_df = raw_df.applymap(lambda x: '/' if pd.isnull(x) else x)
     raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
     raw_df = raw_df.replace({pd.NaT: None})
@@ -345,16 +355,15 @@ def drop_common(df, raw_df):
     # Drop the columns from the dataframe
     df = df.drop(drop_cols, axis=1)
 
-    # If the number of rows in the parsed dataframe is the same as the number of rows in the raw dataframe
-    if len(df) == len(raw_df):
+    # If the number of unique rows in the parsed dataframe is the same as the number of rows in the raw dataframe
+    if num_rows(df) == len(raw_df):
         print('1\t0/%s\t1' % len(df))
 
     # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
     else:
         # Print the number of rows in the parsed and raw dataframes
         print('# in Raw:', len(raw_df))
-        unique_cells = df['failing_results'].nunique()
-        print('# in Parsed:', unique_cells)
+        print('# in Parsed:', num_rows(df))
 
     return raw_df, df
 
@@ -371,9 +380,8 @@ fnames = ['002049附件1.xlsx.pkl.gz', '002144附件1.xls.pkl.gz', '003001附件
           '3.食品抽检不合格产品信息-28.xlsx.pkl.gz', '冷柜1.xls.pkl.gz', '电动1.xls.pkl.gz', '附件2.xlsx.pkl.gz']
 
 # Get the column headers from the dataframe
-col_headers = ['序号', '食品名称', '标称生产（养殖）企业名称', '标称生产（养殖）企业地址', '被抽样单位名称',
-               '被抽样单位地址', '规格型号', '商标', '生产(购进或检疫）日期/批号', '不合格项目||检验结果||单位||标准值',
-               '分类', '品种', '公告号', '公布日期', '检验机构', '备注']
+col_headers = ['序号', '产品名称', '企业名称', '企业所在市', '统一社会信用代码', '生产日期或批号', '规格型号', '商标',
+               '抽查结果', '不合格项目', '承检单位', '抽样日期']
 
 # Define the directory where the parsed files are located
 dir = ROOT + 'Shandong_Shandong_msb_20220707'
@@ -381,7 +389,7 @@ dir = ROOT + 'Shandong_Shandong_msb_20220707'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[17]
+fname = fnames[22]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
