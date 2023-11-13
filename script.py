@@ -287,6 +287,11 @@ def process_date(date):
     # If the last character is a '-', remove it
     if '～' in date:
         date = date.split('～')[0]
+    # Replace '年' and '月' with '-'
+    date = date.replace('年', '-').replace('月', '-')
+    # Remove the last character if it's not a digit
+    if not date[-1].isdigit():
+        date = date[:-1]
     date = date.split()[0]
     # If the date is an integer
     if date.isdigit():
@@ -318,6 +323,7 @@ def drop_common(df, raw_df):
     df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     df = df.fillna('/')
     df = df.applymap(lambda x: None if x == '/' else x)
+    df['production_date'] = df['production_date'].apply(process_date)
 
     raw_df = raw_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     raw_df = raw_df.fillna('/')
@@ -354,19 +360,16 @@ def drop_common(df, raw_df):
             l1 = list(df[col1])
             l2 = list(raw_df[col2])
 
-            try:
-                l1.remove('注：排名不分先后')
-                l2.remove('注：排名不分先后')
+            while '注：排名不分先后' in l1:
+                df = df.iloc[:-1]
+                l1 = list(df[col1])
 
-                if '注：排名不分先后' in l1:
-                    l1.remove('注：排名不分先后')
-                    l2.pop()
-
-            except:
-                pass
+            while '注：排名不分先后' in l2:
+                raw_df = raw_df.iloc[:-1]
+                l2 = list(raw_df[col2])
 
             # If the cells are the same, drop the column
-            if l1 == l2:
+            if l1[:5] == l2[:5] and l1[-5:] == l2[-5:]:
                 # Add the column to the list of columns to be dropped
                 drop_cols.append(col1)
                 break
@@ -402,7 +405,7 @@ dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[5]
+fname = fnames[13]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
