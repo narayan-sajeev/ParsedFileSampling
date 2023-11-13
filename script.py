@@ -347,7 +347,7 @@ def drop_common(df, raw_df):
 
     # If the number of rows in the parsed dataframe is the same as the number of rows in the raw dataframe
     if len(df) == len(raw_df):
-        print(len(df))
+        print('1\t0/%s\t1' % len(df))
 
     # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
     else:
@@ -381,7 +381,7 @@ dir = ROOT + 'Shandong_Shandong_msb_20220707'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[15]
+fname = fnames[17]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
