@@ -223,9 +223,7 @@ def get_path(dir, fname):
 # Function to print the dataframe
 def print_df(df, raw_df):
     # Print the file path
-    s = 'open %s' % get_path(dir, fname)
-    txt = s.split('/')[-1]
-    print(txt)
+    print(fname.split('.pkl')[0])
 
     # Drop columns that have all duplicate rows
     no_dup_df = df.loc[:, df.nunique() != 1]
@@ -237,9 +235,6 @@ def print_df(df, raw_df):
         quit()
 
     df = no_dup_df
-
-    # Open the file
-    os.system(s)
 
     # Print first few rows of the dataframe
     print()
@@ -378,48 +373,45 @@ def drop_common(df, raw_df):
     # Drop the columns from the dataframe
     df = df.drop(drop_cols, axis=1)
 
+    df = df.applymap(lambda x: None if x == 'Non' else x)
+
     return raw_df, df
 
 
 # list of file names to be read in
-fnames = ['100618食用农产品抽检信息（合格）.xls.pkl.gz', '101316薯类和膨化食品抽检信息（合格）.xls.pkl.gz',
-          '101809速冻食品监督抽检信息（合格）.xls.pkl.gz', '102153淀粉及淀粉制品监督抽检产品信息（合格）.xls.pkl.gz',
-          '102811豆制品监督抽检信息（合格）.xls.pkl.gz', '103046食用油、油脂及其制品监督抽检信息（合格）.xls.pkl.gz',
-          '105759附件6食用农产品监督抽检产品合格信息.xlsx.pkl.gz', '1206575.肉及肉制品监督抽检产品合格信息.xls.pkl.gz',
-          '16310683835829430.xlsx.pkl.gz', '16食品抽检不合格-20161123-蔬菜制品.xlsx.pkl.gz',
-          '2016年第20号通告附件2.xls.pkl.gz', '25食品抽检合格-20170816-豆制品.xls.pkl.gz',
-          '33食品抽检合格-20161005-食品添加剂.xls.pkl.gz', '4食品抽检合格-20170726-肉制品.xls.pkl.gz',
-          '4食品抽检合格-20171122-肉制品.xls.pkl.gz', '5.薯类和膨化食品监督抽检不合格产品信息.xlsx.pkl.gz',
-          '7食品抽检合格-20170726-方便食品.xls.pkl.gz', '淀粉及淀粉制品监督抽检信息（合格）.xlsx.pkl.gz',
-          '特殊膳食食品监督抽检信息（合格）.xls.pkl.gz', '蛋制品监督抽检信息（合格）.xls.pkl.gz',
-          '附件5保健食品监督抽检产品合格信息.xlsx.pkl.gz', '食品抽检不合格-20160511-食用农产品.xls.pkl.gz',
-          '食品抽检合格-20160127-焙烤食品.xls.pkl.gz', '食品抽检合格-20180214-食用农产品.xls.pkl.gz',
-          '食品抽检合格-20180314-糖果制品.xls.pkl.gz']
-
-# Get the column headers from the dataframe
-col_headers = ['序号', '标称生产企业名称', '标称生产企业地址', '被抽样单位名称', '被抽样单位地址', '食品名称',
-               '规格型号', '商标', '生产日期/批号', '不合格项目║检验结果║标准值', '分类', '公告号', '公告日期',
-               '任务来源/项目名称', '备注']
+fnames = ['201914.xls.pkl.gz', '附件2-合格-2019年11号食品抽检信息.xlsx.pkl.gz',
+          '附件2-合格-2019年25号信息公布.xlsx.pkl.gz', '附件2-合格-2019年28号食品抽检信息公布.xlsx.pkl.gz',
+          '附件2-合格-2019年31号信息公布.xlsx.pkl.gz', '附件2-合格-2019年35号信息公布.xlsx.pkl.gz',
+          '附件2-合格-2019年38号信息公布.xlsx.pkl.gz', '附件2-合格-2019年41号信息公布.xlsx.pkl.gz',
+          '附件2-合格-2019年44号信息公布1.xlsx.pkl.gz', '附件2-合格-2019年47号信息公布.xlsx.pkl.gz',
+          '附件2-合格-2019年50号信息公布.xlsx.pkl.gz', '附件2-合格-2019年56号信息公布.xlsx.pkl.gz',
+          '附件2-合格-2019年9号信息公布.xlsx.pkl.gz', '附件2-合格-2020年8号信息公布.xlsx.pkl.gz',
+          '附件3-不合格-2019年11号食品抽检信息.xlsx.pkl.gz', '附件3-不合格-2019年38号信息公布.xlsx.pkl.gz',
+          '附件3-不合格-2019年46号信息公布.xlsx.pkl.gz', '附件3-不合格-2019年47号信息公布.xlsx.pkl.gz',
+          '附件3-不合格-2019年53号信息公布.xlsx.pkl.gz', '附件3-不合格-2019年6号食品抽检信息.xlsx.pkl.gz',
+          '附件3-不合格-2019年8号信息公布.xlsx.pkl.gz', '附件3-不合格-2020年12号信息公布.xlsx.pkl.gz',
+          '附件3-不合格-2020年15号信息公布.xlsx.pkl.gz', '附件3-不合格-2020年4号信息公布.xlsx.pkl.gz',
+          '附件3-不合格-2020年8号信息公布.xlsx.pkl.gz']
 
 # Define the directory where the parsed files are located
-dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
+dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
 
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[23]
+fname = fnames[0]
+
+# Read the raw Excel file
+raw_df = read_excel(dir, fname)
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
 
 # Check substrings for unmatched columns
-review_cols = substring(df, get_known_cols(), col_headers)
+review_cols = substring(df, get_known_cols(), raw_df.columns)
 
 # Drop unnecessary columns from the dataframe
 df = drop_columns(df, review_cols)
-
-# Read the raw Excel file
-raw_df = read_excel(dir, fname)
 
 # Drop common columns from the dataframe
 raw_df, df = drop_common(df, raw_df)
