@@ -324,23 +324,9 @@ def drop_common(df, raw_df):
     raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
     raw_df = raw_df.replace({pd.NaT: None})
 
-    drop_cols = []
-
-    # Drop columns that are common to both the parsed and raw dataframes
-    for col1 in df.columns:
-        for col2 in raw_df.columns:
-            l1 = list(df[col1])
-            l2 = list(raw_df[col2])
-            # If the cells are the same, drop the column
-            if l1 == l2:
-                # Add the column to the list of columns to be dropped
-                drop_cols.append(col1)
-                break
-
-    # Drop the columns from the dataframe
-    df = df.drop(drop_cols, axis=1)
-
     unique_rows = len(df)
+
+    drop_empty = raw_df.dropna(how='all')
 
     try:
         unique_rows = df['failing_results'].nunique()
@@ -351,11 +337,42 @@ def drop_common(df, raw_df):
     if unique_rows == len(raw_df):
         print('1\t0/%s\t1' % len(df))
 
-    # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
+    elif len(drop_empty) == len(df):
+        print('1\t0/%s\t1' % len(df))
+        raw_df = drop_empty
+
     else:
         # Print the number of rows in the parsed and raw dataframes
         print('Raw:', len(raw_df))
         print('Parsed:', unique_rows)
+
+    drop_cols = []
+
+    # Drop columns that are common to both the parsed and raw dataframes
+    for col1 in df.columns:
+        for col2 in raw_df.columns:
+            l1 = list(df[col1])
+            l2 = list(raw_df[col2])
+
+            try:
+                l1.remove('注：排名不分先后')
+                l2.remove('注：排名不分先后')
+
+                if '注：排名不分先后' in l1:
+                    l1.remove('注：排名不分先后')
+                    l2.pop()
+
+            except:
+                pass
+
+            # If the cells are the same, drop the column
+            if l1 == l2:
+                # Add the column to the list of columns to be dropped
+                drop_cols.append(col1)
+                break
+
+    # Drop the columns from the dataframe
+    df = df.drop(drop_cols, axis=1)
 
     return raw_df, df
 
@@ -385,7 +402,7 @@ dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[4]
+fname = fnames[5]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
