@@ -277,10 +277,8 @@ def print_df(df, raw_df):
 def read_excel(dir, fname):
     # Read the raw Excel file
     raw_df = pd.read_excel(get_path(dir, fname))
-    mask = (raw_df == '序号').any(axis=1)
-    if mask.any():  # Check if '序号' exists in the DataFrame
-        index_to_drop = raw_df[mask].index[0]  # Get the index of the first occurrence
-        raw_df = raw_df.loc[index_to_drop + 1:]
+    idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]  # Get the index of the first occurrence
+    raw_df = raw_df.loc[idx + 1:]
     raw_df = raw_df.applymap(lambda x: '/' if pd.isnull(x) else x)
     return raw_df
 
@@ -415,3 +413,9 @@ raw_df, df = drop_common(df, raw_df)
 
 # Print the dataframe
 print_df(df, raw_df)
+
+"""
+    # Read the Excel file again, this time specifying the header row
+    raw_df = pd.read_excel(get_path(dir, fname), header=idx)
+    raw_df = raw_df.loc[idx + 1:]
+"""
