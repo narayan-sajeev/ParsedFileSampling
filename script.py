@@ -8,8 +8,6 @@ import pandas as pd
 
 # Define the root directory where the parsed files are located
 ROOT = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
-# Production date columns
-dates = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号']
 
 
 # Function to get all file names from a directory
@@ -240,16 +238,6 @@ def print_df(df, raw_df):
 
     df = no_dup_df
 
-    cols = list(df.columns)
-
-    if cols == ['production_date']:
-        for date in dates:
-            try:
-                raw_df = pd.DataFrame(raw_df[date])
-                break
-            except:
-                pass
-
     # Open the file
     os.system(s)
 
@@ -277,9 +265,12 @@ def print_df(df, raw_df):
 def read_excel(dir, fname):
     # Read the raw Excel file
     raw_df = pd.read_excel(get_path(dir, fname))
-    idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]  # Get the index of the first occurrence
+    # Get the index of the first occurrence
+    idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
+    # Set the column headers to be the entries in the row that contains '序号'
+    raw_df.columns = raw_df.iloc[idx]
     raw_df = raw_df.loc[idx + 1:]
-    raw_df = raw_df.applymap(lambda x: '/' if pd.isnull(x) else x)
+    raw_df = raw_df.fillna('/')
     return raw_df
 
 
@@ -316,7 +307,7 @@ def process_date(date):
 # Function to drop common columns
 def drop_common(df, raw_df):
     # Process the production date columns
-    for col in dates:
+    for col in ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号']:
         # Try to process the date column
         try:
             # Apply the process_date function to the date column
@@ -325,11 +316,11 @@ def drop_common(df, raw_df):
             pass
 
     df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-    df = df.applymap(lambda x: '/' if pd.isnull(x) else x)
+    df = df.fillna('/')
     df = df.applymap(lambda x: None if x == '/' else x)
 
     raw_df = raw_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-    raw_df = raw_df.applymap(lambda x: '/' if pd.isnull(x) else x)
+    raw_df = raw_df.fillna('/')
     raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
     raw_df = raw_df.replace({pd.NaT: None})
 
@@ -413,9 +404,3 @@ raw_df, df = drop_common(df, raw_df)
 
 # Print the dataframe
 print_df(df, raw_df)
-
-"""
-    # Read the Excel file again, this time specifying the header row
-    raw_df = pd.read_excel(get_path(dir, fname), header=idx)
-    raw_df = raw_df.loc[idx + 1:]
-"""
