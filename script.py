@@ -226,7 +226,6 @@ def print_df(df, raw_df):
     s = 'open %s' % get_path(dir, fname)
     txt = s.split('/')[-1]
     print(txt)
-    print(fname.split('.pkl')[0])
 
     # Drop columns that have all duplicate rows
     no_dup_df = df.loc[:, df.nunique() != 1]
@@ -282,6 +281,7 @@ def process_date(date):
         return None
     # Convert the date column to a string
     date = str(date).split('：')[-1]
+    date = date.replace('加工日期', '')
     date = date[:10].replace('//', '').replace('/', '-').replace('.', '-')
     # If the last character is a '-', remove it
     if date[-1] == '-':
