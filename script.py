@@ -271,14 +271,10 @@ def print_df(df, raw_df):
 def read_excel(dir, fname, df):
     # Read the raw Excel file
     raw_df = pd.read_excel(get_path(dir, fname))
-    # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
-    diff = len(raw_df) - num_rows(df)
-    # Skip the first few rows of the raw dataframe
-    raw_df = pd.read_excel(get_path(dir, fname), skiprows=diff)
     mask = (raw_df == '序号').any(axis=1)
     if mask.any():  # Check if '序号' exists in the DataFrame
         index_to_drop = df[mask].index[0]  # Get the index of the first occurrence
-        raw_df = df.loc[index_to_drop + 1:]
+        raw_df = df.loc[index_to_drop:]
     raw_df = raw_df.applymap(lambda x: '/' if pd.isnull(x) else x)
     return raw_df
 
@@ -311,14 +307,6 @@ def process_date(date):
     # Return the original value
     except ValueError:
         return date
-
-
-# Count the number of rows in the dataframe
-def num_rows(df):
-    try:
-        return df['failing_results'].nunique()
-    except:
-        return len(df)
 
 
 # Function to drop common columns
@@ -355,41 +343,47 @@ def drop_common(df, raw_df):
     # Drop the columns from the dataframe
     df = df.drop(drop_cols, axis=1)
 
+    unique_rows = df['failing_results'].nunique()
+
     # If the number of unique rows in the parsed dataframe is the same as the number of rows in the raw dataframe
-    if num_rows(df) == len(raw_df):
+    if unique_rows == len(raw_df):
         print('1\t0/%s\t1' % len(df))
 
     # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
     else:
         # Print the number of rows in the parsed and raw dataframes
         print('# in Raw:', len(raw_df))
-        print('# in Parsed:', num_rows(df))
+        print('# in Parsed:', unique_rows)
 
     return raw_df, df
 
 
 # list of file names to be read in
-fnames = ['002049附件1.xlsx.pkl.gz', '002144附件1.xls.pkl.gz', '003001附件1.xls.pkl.gz', '003250附件1.xls.pkl.gz',
-          '003256附件1.xls.pkl.gz', '004900附件2.xls.pkl.gz', '005125附件1.xls.pkl.gz', '005811附件1.xls.pkl.gz',
-          '010042附件1.xls.pkl.gz', '010405附件1.xls.pkl.gz', '0106503.食品抽检不合格产品信息.xlsx.pkl.gz',
-          '010802附件1.xls.pkl.gz', '1.婴幼儿配方食品抽检合格产品信息.xlsx.pkl.gz',
-          '1.食品抽检合格产品信息-15.xlsx.pkl.gz', '2.食品抽检不合格产品信息-15.xlsx.pkl.gz',
-          '2.食品抽检不合格产品信息-18.xlsx.pkl.gz', '2.食品抽检合格产品信息-3.xls.pkl.gz',
-          '2.食品抽检合格产品信息-49.xlsx.pkl.gz', '2.食品抽检合格产品信息-59.xls.pkl.gz',
-          '2.食品抽检合格产品信息-70.xls.pkl.gz', '2_食品抽检合格产品信息.xlsx.pkl.gz',
-          '3.食品抽检不合格产品信息-28.xlsx.pkl.gz', '冷柜1.xls.pkl.gz', '电动1.xls.pkl.gz', '附件2.xlsx.pkl.gz']
+fnames = ['100618食用农产品抽检信息（合格）.xls.pkl.gz', '101316薯类和膨化食品抽检信息（合格）.xls.pkl.gz',
+          '101809速冻食品监督抽检信息（合格）.xls.pkl.gz', '102153淀粉及淀粉制品监督抽检产品信息（合格）.xls.pkl.gz',
+          '102811豆制品监督抽检信息（合格）.xls.pkl.gz', '103046食用油、油脂及其制品监督抽检信息（合格）.xls.pkl.gz',
+          '105759附件6食用农产品监督抽检产品合格信息.xlsx.pkl.gz', '1206575.肉及肉制品监督抽检产品合格信息.xls.pkl.gz',
+          '16310683835829430.xlsx.pkl.gz', '16食品抽检不合格-20161123-蔬菜制品.xlsx.pkl.gz',
+          '2016年第20号通告附件2.xls.pkl.gz', '25食品抽检合格-20170816-豆制品.xls.pkl.gz',
+          '33食品抽检合格-20161005-食品添加剂.xls.pkl.gz', '4食品抽检合格-20170726-肉制品.xls.pkl.gz',
+          '4食品抽检合格-20171122-肉制品.xls.pkl.gz', '5.薯类和膨化食品监督抽检不合格产品信息.xlsx.pkl.gz',
+          '7食品抽检合格-20170726-方便食品.xls.pkl.gz', '淀粉及淀粉制品监督抽检信息（合格）.xlsx.pkl.gz',
+          '特殊膳食食品监督抽检信息（合格）.xls.pkl.gz', '蛋制品监督抽检信息（合格）.xls.pkl.gz',
+          '附件5保健食品监督抽检产品合格信息.xlsx.pkl.gz', '食品抽检不合格-20160511-食用农产品.xls.pkl.gz',
+          '食品抽检合格-20160127-焙烤食品.xls.pkl.gz', '食品抽检合格-20180214-食用农产品.xls.pkl.gz',
+          '食品抽检合格-20180314-糖果制品.xls.pkl.gz']
 
 # Get the column headers from the dataframe
-col_headers = ['序号', '产品名称', '企业名称', '企业所在市', '统一社会信用代码', '生产日期或批号', '规格型号', '商标',
-               '抽查结果', '不合格项目', '承检单位', '抽样日期']
+col_headers = ['序号', '标识生产企业名称', '标识生产企业地址', '被抽样单位名称', '被抽样单位所在省份', '食品名称',
+               '规格型号', '生产日期/批号', '检验机构', '备注']
 
 # Define the directory where the parsed files are located
-dir = ROOT + 'Shandong_Shandong_msb_20220707'
+dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
 
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[22]
+fname = fnames[24]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
