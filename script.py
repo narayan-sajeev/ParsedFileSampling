@@ -268,7 +268,7 @@ def print_df(df, raw_df):
 
 
 # Function to read the raw Excel file
-def read_excel(dir, fname, df):
+def read_excel(dir, fname):
     # Read the raw Excel file
     raw_df = pd.read_excel(get_path(dir, fname))
     mask = (raw_df == '序号').any(axis=1)
@@ -400,7 +400,7 @@ review_cols = substring(df, get_known_cols(), col_headers)
 df = drop_columns(df, review_cols)
 
 # Read the raw Excel file
-raw_df = read_excel(dir, fname, df)
+raw_df = read_excel(dir, fname)
 
 # Drop common columns from the dataframe
 raw_df, df = drop_common(df, raw_df)
