@@ -223,6 +223,9 @@ def get_path(dir, fname):
 # Function to print the dataframe
 def print_df(df, raw_df):
     # Print the file path
+    s = 'open %s' % get_path(dir, fname)
+    txt = s.split('/')[-1]
+    print(txt)
     print(fname.split('.pkl')[0])
 
     # Drop columns that have all duplicate rows
@@ -235,6 +238,9 @@ def print_df(df, raw_df):
         quit()
 
     df = no_dup_df
+
+    # Open the file
+    os.system(s)
 
     # Print first few rows of the dataframe
     print()
@@ -399,7 +405,7 @@ dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[0]
+fname = fnames[2]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
