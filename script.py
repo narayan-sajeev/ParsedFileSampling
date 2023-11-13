@@ -273,8 +273,8 @@ def read_excel(dir, fname, df):
     raw_df = pd.read_excel(get_path(dir, fname))
     mask = (raw_df == '序号').any(axis=1)
     if mask.any():  # Check if '序号' exists in the DataFrame
-        index_to_drop = df[mask].index[0]  # Get the index of the first occurrence
-        raw_df = df.loc[index_to_drop:]
+        index_to_drop = raw_df[mask].index[0]  # Get the index of the first occurrence
+        raw_df = raw_df.loc[index_to_drop:]
     raw_df = raw_df.applymap(lambda x: '/' if pd.isnull(x) else x)
     return raw_df
 
@@ -380,7 +380,7 @@ fnames = ['100618食用农产品抽检信息（合格）.xls.pkl.gz', '101316薯
 
 # Get the column headers from the dataframe
 col_headers = ['序号', '标识生产企业名称', '标识生产企业地址', '被抽样单位名称', '被抽样单位所在省份', '食品名称',
-               '规格型号', '生产日期/批号', '检验机构', '备注']
+               '规格型号', '生产日期/批号', '分类', '检验机构']
 
 # Define the directory where the parsed files are located
 dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
@@ -388,7 +388,7 @@ dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[24]
+fname = fnames[0]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
