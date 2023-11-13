@@ -256,7 +256,6 @@ def print_df(df, raw_df):
     # Print first few rows of the dataframe
     print()
     print(df.head())
-    hr()
 
     # Print last few rows of the dataframe
     if len(df) > 10:
