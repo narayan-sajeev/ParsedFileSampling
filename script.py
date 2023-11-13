@@ -77,7 +77,7 @@ def substring(df, known_cols, col_headers):
 
     # dictionary of substrings to check for in column headers
     substr_sets = {
-        'announcement_date': ['检', '抽', '报'],
+        'announcement_date': ['检', '抽', '报', '公布'],
         'address': ['地址', '所在地'],
         'region': ['省', '县', '市', '区'],
         'been_sampled': ['受', '被'],
@@ -352,8 +352,9 @@ def drop_common(df, raw_df):
     # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
     else:
         # Print the number of rows in the parsed and raw dataframes
-        print('Rows in Parsed:', len(df))
-        print('Rows in Raw:', len(raw_df))
+        print('# in Raw:', len(raw_df))
+        unique_cells = df['failing_results'].nunique()
+        print('# in Parsed:', unique_cells)
 
     return raw_df, df
 
@@ -372,7 +373,7 @@ fnames = ['002049附件1.xlsx.pkl.gz', '002144附件1.xls.pkl.gz', '003001附件
 # Get the column headers from the dataframe
 col_headers = ['序号', '食品名称', '标称生产（养殖）企业名称', '标称生产（养殖）企业地址', '被抽样单位名称',
                '被抽样单位地址', '规格型号', '商标', '生产(购进或检疫）日期/批号', '不合格项目||检验结果||单位||标准值',
-               '分类', '品种', '公告号', '公告日期', '检验机构', '备注']
+               '分类', '品种', '公告号', '公布日期', '检验机构', '备注']
 
 # Define the directory where the parsed files are located
 dir = ROOT + 'Shandong_Shandong_msb_20220707'
