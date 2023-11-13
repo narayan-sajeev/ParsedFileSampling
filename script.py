@@ -280,7 +280,8 @@ def process_date(date):
     if date in ['/', '-']:
         return None
     # Convert the date column to a string
-    date = str(date)[:10].replace('//', '').replace('/', '-').replace('.', '-')
+    date = str(date).split('：')[-1]
+    date = date[:10].replace('//', '').replace('/', '-').replace('.', '-')
     # If the last character is a '-', remove it
     if date[-1] == '-':
         date = date[:-1]
@@ -396,8 +397,9 @@ fnames = ['100618食用农产品抽检信息（合格）.xls.pkl.gz', '101316薯
           '食品抽检合格-20180314-糖果制品.xls.pkl.gz']
 
 # Get the column headers from the dataframe
-col_headers = ['序号', '标识生产企业名称', '标识生产企业地址', '被抽样单位名称', '被抽样单位所在省份', '食品名称',
-               '规格型号', '生产日期/批号', '分类', '检验机构']
+col_headers = ['序号', '标称生产企业名称', '标称生产企业地址', '被抽样单位名称', '被抽样单位地址', '食品名称',
+               '规格型号', '商标', '生产日期/批号', '不合格项目║检验结果║标准值', '分类', '公告号', '公告日期',
+               '任务来源/项目名称', '备注']
 
 # Define the directory where the parsed files are located
 dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
@@ -405,7 +407,7 @@ dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[13]
+fname = fnames[23]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
