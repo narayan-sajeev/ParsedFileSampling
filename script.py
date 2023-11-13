@@ -257,20 +257,15 @@ def print_df(df, raw_df):
     print()
     print(df.head())
     hr()
-    print(raw_df.head())
 
     # Print last few rows of the dataframe
     if len(df) > 10:
         hr()
         print(df.tail())
-        hr()
-        print(raw_df.tail())
 
     elif len(df) > 5:
         hr()
         print(df.tail(len(df) - 5))
-        hr()
-        print(raw_df.tail(len(df) - 5))
 
 
 # Function to read the raw Excel file
@@ -386,7 +381,7 @@ dir = ROOT + 'Shandong_Shandong_msb_20220707'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[14]
+fname = fnames[15]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
