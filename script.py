@@ -343,7 +343,12 @@ def drop_common(df, raw_df):
     # Drop the columns from the dataframe
     df = df.drop(drop_cols, axis=1)
 
-    unique_rows = df['failing_results'].nunique()
+    unique_rows = len(df)
+
+    try:
+        unique_rows = df['failing_results'].nunique()
+    except:
+        pass
 
     # If the number of unique rows in the parsed dataframe is the same as the number of rows in the raw dataframe
     if unique_rows == len(raw_df):
@@ -352,8 +357,8 @@ def drop_common(df, raw_df):
     # If the number of rows in the parsed dataframe is different from the number of rows in the raw dataframe
     else:
         # Print the number of rows in the parsed and raw dataframes
-        print('# in Raw:', len(raw_df))
-        print('# in Parsed:', unique_rows)
+        print('Raw:', len(raw_df))
+        print('Parsed:', unique_rows)
 
     return raw_df, df
 
