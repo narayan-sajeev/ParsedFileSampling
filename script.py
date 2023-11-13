@@ -256,15 +256,21 @@ def print_df(df, raw_df):
     # Print first few rows of the dataframe
     print()
     print(df.head())
+    hr()
+    print(raw_df.head())
 
     # Print last few rows of the dataframe
     if len(df) > 10:
         hr()
         print(df.tail())
+        hr()
+        print(raw_df.tail())
 
     elif len(df) > 5:
         hr()
         print(df.tail(len(df) - 5))
+        hr()
+        print(raw_df.tail(len(df) - 5))
 
 
 # Function to read the raw Excel file
@@ -334,8 +340,10 @@ def drop_common(df, raw_df):
     # Drop columns that are common to both the parsed and raw dataframes
     for col1 in df.columns:
         for col2 in raw_df.columns:
+            l1 = list(df[col1])
+            l2 = list(raw_df[col2])
             # If the cells are the same, drop the column
-            if df[col1].equals(raw_df[col2]):
+            if l1 == l2:
                 # Add the column to the list of columns to be dropped
                 drop_cols.append(col1)
                 break
@@ -388,7 +396,7 @@ dir = ROOT + 'Shanghai_Shanghai_msb_20220302'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[0]
+fname = fnames[4]
 
 # Read the dataframe from the pickle file
 df = get_df(dir, fname)
