@@ -328,18 +328,25 @@ def drop_common(df, raw_df):
             pass
 
     df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    df = df.applymap(lambda x: x.replace('，', '_') if isinstance(x, str) else x)
+    df = df.applymap(lambda x: x.replace(',', '_') if isinstance(x, str) else x)
     df.replace('\t', '', regex=True, inplace=True)
     df = df.fillna('/')
     df = df.applymap(lambda x: None if x == '/' else x)
     df['production_date'] = df['production_date'].apply(process_date)
 
     raw_df = raw_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    raw_df = raw_df.applymap(lambda x: x.replace('，', '_') if isinstance(x, str) else x)
+    raw_df = raw_df.applymap(lambda x: x.replace(',', '_') if isinstance(x, str) else x)
     raw_df.replace('\t', '', regex=True, inplace=True)
     raw_df = raw_df.fillna('/')
     raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
     raw_df = raw_df.replace({pd.NaT: None})
-    raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df["不合格项目‖检验结果‖标准值"].str.split('‖',
-                                                                                                           expand=True)
+    try:
+        raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df["不合格项目‖检验结果‖标准值"].str.split('‖',
+                                                                                                               expand=True)
+    except:
+        pass
 
     unique_rows = len(df)
 
@@ -385,6 +392,9 @@ def drop_common(df, raw_df):
                 drop_cols.append(col1)
                 break
 
+            elif col1 == col2:
+                debug(l1, l2)
+
     # Drop the columns from the dataframe
     df = df.drop(drop_cols, axis=1)
 
@@ -414,7 +424,7 @@ dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[19]
+fname = fnames[22]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
