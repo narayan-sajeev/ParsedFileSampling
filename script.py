@@ -266,10 +266,13 @@ def read_excel(dir, fname):
     # Read the raw Excel file
     raw_df = pd.read_excel(get_path(dir, fname))
     # Get the index of the first occurrence
-    idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
-    # Set the column headers to be the entries in the row that contains '序号'
-    raw_df.columns = raw_df.iloc[idx]
-    raw_df = raw_df.loc[idx + 1:]
+    try:
+        idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
+        # Set the column headers to be the entries in the row that contains '序号'
+        raw_df.columns = raw_df.iloc[idx]
+        raw_df = raw_df.loc[idx + 1:]
+    except:
+        pass
     raw_df = raw_df.fillna('/')
     return raw_df
 
@@ -282,7 +285,7 @@ def process_date(date):
     # Convert the date column to a string
     date = str(date).split('：')[-1]
     date = date.replace('加工日期', '').replace('检疫日期', '').replace('购进日期', '')
-    date = date[:10].replace('//', '').replace('/', '-').replace('.', '-')
+    date = date[:10].replace('//', '').replace('/', '-').replace('.', '-').replace('D', '')
     # If the last character is a '-', remove it
     if date[-1] == '-':
         date = date[:-1]
@@ -425,7 +428,7 @@ dir = ROOT + 'Tianjin_Tianjin_msb_20220625'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[0]
+fname = fnames[6]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
