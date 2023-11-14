@@ -342,6 +342,7 @@ def drop_common(df, raw_df):
     raw_df = raw_df.fillna('/')
     raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
     raw_df = raw_df.replace({pd.NaT: None})
+    
     try:
         raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df["不合格项目‖检验结果‖标准值"].str.split('‖',
                                                                                                                expand=True)
@@ -424,7 +425,7 @@ dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[22]
+fname = fnames[23]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
