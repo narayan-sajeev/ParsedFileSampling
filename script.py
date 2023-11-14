@@ -2,9 +2,13 @@
 import json
 import os
 import random
+import warnings
 from datetime import datetime
 
 import pandas as pd
+
+# Ignore all warnings
+warnings.filterwarnings("ignore")
 
 # Define the root directory where the parsed files are located
 ROOT = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
@@ -68,8 +72,12 @@ def substring(df, known_cols, col_headers):
     # Clean up the column headers
     col_headers = clean(col_headers)
 
+    bad = ['地市', '检验报告编号', '抽查结果']
+
     try:
-        col_headers.remove('抽查结果')
+        for _ in bad:
+            while _ in col_headers:
+                col_headers.remove(_)
     except:
         pass
 
@@ -196,7 +204,7 @@ def drop_columns(df, col_headers):
     # Remove unnecessary column headers
     for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
               '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
-              '统一社会信用代码', '产品细类', '企业所在市']:
+              '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号']:
         try:
             col_headers.remove(_)
         except:
@@ -283,9 +291,11 @@ def process_date(date):
     if date in ['/', '-']:
         return None
     # Convert the date column to a string
-    date = str(date).split('：')[-1]
+    date = str(date).split('：')[-1].strip()
+    if date.startswith('/'):
+        date = date[1:]
     date = date.replace('加工日期', '').replace('检疫日期', '').replace('购进日期', '')
-    date = date[:10].replace('//', '').replace('/', '-').replace('.', '-')
+    date = date[:10].replace(' ', '').replace('//', '').replace('/', '-').replace('.', '-')
     date = date.replace('T', '').replace('J', '').replace('D', '')
     # If the last character is a '-', remove it
     if date[-1] == '-':
@@ -299,6 +309,8 @@ def process_date(date):
     if not date[-1].isdigit():
         date = date[:-1]
     date = date.split()[0]
+    if date.count('-') == 1:
+        return None
     # If the date is an integer
     if date.isdigit():
         try:
@@ -308,6 +320,14 @@ def process_date(date):
             return None
     # Format the date column
     date = '-'.join(date.split('-')[:3])
+    try:
+        return datetime.strptime(date, '%Y-%m%d').strftime('%Y-%m-%d')
+    except:
+        pass
+    try:
+        return datetime.strptime(date, '%m-%d-%Y').strftime('%Y-%m-%d')
+    except:
+        pass
     try:
         return datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
     # Return the original value
@@ -324,7 +344,7 @@ def debug(l1, l2):
 def drop_common(df, raw_df):
     # Process the production date columns
     for col in ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
-                '生产日期（批号）']:
+                '生产日期（批号）', '生产日期/批号/购进日期']:
         # Try to process the date column
         try:
             # Apply the process_date function to the date column
@@ -338,7 +358,11 @@ def drop_common(df, raw_df):
     df.replace('\t', '', regex=True, inplace=True)
     df = df.fillna('/')
     df = df.applymap(lambda x: None if x == '/' else x)
-    df['production_date'] = df['production_date'].apply(process_date)
+
+    try:
+        df['production_date'] = df['production_date'].apply(process_date)
+    except:
+        pass
 
     raw_df = raw_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     raw_df = raw_df.applymap(lambda x: x.replace('，', '_') if isinstance(x, str) else x)
@@ -410,27 +434,23 @@ def drop_common(df, raw_df):
 
 
 # list of file names to be read in
-fnames = ['174438食品抽检合格-乳制品.xls.pkl.gz', '174746食品抽检不合格-食用农产品.xls.pkl.gz',
-          '175414食品抽检合格-蛋制品.xls.pkl.gz', '175437食品抽检合格-粮食加工品.xls.pkl.gz',
-          '181120附件6.方便监督抽检产品合格信息.xls.pkl.gz', '182753附件4_方便食品监督抽检合格产品信息.xls.pkl.gz',
-          '183442食品监督抽检合格产品信息.xls.pkl.gz', '184046速冻食品监督抽检合格产品信息.xls.pkl.gz',
-          '184111婴幼儿配方乳粉监督抽检合格产品信息.xls.pkl.gz', '184528合格产品信息.xls.pkl.gz',
-          '184541合格产品信息.xls.pkl.gz', '185138合格产品信息.xls.pkl.gz',
-          '婴幼儿配方乳粉监督抽检合格产品信息.xlsx.pkl.gz', '糖果制品监督抽检不合格产品信息.xls.pkl.gz',
-          '膨化食品监督抽检不合格产品信息.xls.pkl.gz', '蛋制品监督抽检信息.xls.pkl.gz',
-          '调味品监督抽检合格产品信息.xls.pkl.gz', '附件19_罐头监督抽检合格产品信息.xls.pkl.gz',
-          '附件2_豆制品监督抽检合格产品信息.xlsx.pkl.gz', '附件4_食品添加剂监督抽检合格产品信息.xls.pkl.gz',
-          '附件5.豆制品监督抽检产品合格信息.xls.pkl.gz', '附件6_糕点监督抽检合格产品信息.xls.pkl.gz',
-          '附件7_糖果制品监督抽检合格产品信息.xls.pkl.gz', '附件8.调味品监督抽检产品合格信息.xls.pkl.gz',
-          '附件8.食用油、油脂及其制品监督抽检产品合格信息.xls.pkl.gz']
+fnames = ['023101.xlsx.pkl.gz', '023352.xls.pkl.gz', '023402.xls.pkl.gz', '023405.xls.pkl.gz', '023407.xls.pkl.gz',
+          '023409.xls.pkl.gz', '023411.xls.pkl.gz', '023413.xls.pkl.gz',
+          '023428监督抽检（国抽）合格_不合格产品信息统计表.xls.pkl.gz',
+          '1.西藏自治区２０２１年月饼抽检合格产品信息.xlsx.pkl.gz',
+          '2021年产品质量自治区专项监督抽查检验结果送达公告名单.xls.pkl.gz',
+          '2021年产品质量自治区监督抽查检验结果送达公告名单.xlsx.pkl.gz',
+          '监督抽检（国抽）合格_不合格产品信息统计表.xls.pkl.gz', '监督抽检（省抽）合格_不合格产品信息统计表.xls.pkl.gz',
+          '监督抽检（省检）合格_不合格产品信息表.xls.pkl.gz', '送达公告附件.xlsx.pkl.gz',
+          '２.西藏自治区２０２１年月饼抽检不合格产品信息.xlsx.pkl.gz']
 
 # Define the directory where the parsed files are located
-dir = ROOT + 'Tianjin_Tianjin_msb_20220625'
+dir = ROOT + 'Tibet_Tibet_msb_20220317'
 
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[9]
+fname = fnames[0]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
