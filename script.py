@@ -227,7 +227,7 @@ def print_df(df, raw_df):
     txt = s.split('/')[-1]
     print(txt)
 
-    # Drop columns that have all duplicate rows
+    # Drop columns that have all duplicate cells
     no_dup_df = df.loc[:, df.nunique() != 1]
 
     cols = list(df.columns)
@@ -342,7 +342,7 @@ def drop_common(df, raw_df):
     raw_df = raw_df.fillna('/')
     raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
     raw_df = raw_df.replace({pd.NaT: None})
-    
+
     try:
         raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df["不合格项目‖检验结果‖标准值"].str.split('‖',
                                                                                                                expand=True)
