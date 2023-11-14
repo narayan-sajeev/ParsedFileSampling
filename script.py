@@ -328,11 +328,13 @@ def drop_common(df, raw_df):
             pass
 
     df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    df.replace('\t', '', regex=True, inplace=True)
     df = df.fillna('/')
     df = df.applymap(lambda x: None if x == '/' else x)
     df['production_date'] = df['production_date'].apply(process_date)
 
     raw_df = raw_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    raw_df.replace('\t', '', regex=True, inplace=True)
     raw_df = raw_df.fillna('/')
     raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
     raw_df = raw_df.replace({pd.NaT: None})
@@ -410,7 +412,7 @@ dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[15]
+fname = fnames[16]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
