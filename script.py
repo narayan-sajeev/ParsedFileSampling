@@ -311,6 +311,11 @@ def process_date(date):
         return date
 
 
+def debug(l1, l2):
+    for i, _ in enumerate(l1):
+        print(_, l2[i], _ == l2[i])
+
+
 # Function to drop common columns
 def drop_common(df, raw_df):
     # Process the production date columns
