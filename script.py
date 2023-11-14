@@ -244,21 +244,15 @@ def print_df(df, raw_df):
     # Print first few rows of the dataframe
     print()
     print(df.head())
-    hr()
-    print(raw_df.head())
 
     # Print last few rows of the dataframe
     if len(df) > 10:
         hr()
         print(df.tail())
-        hr()
-        print(raw_df.tail())
 
     elif len(df) > 5:
         hr()
         print(df.tail(len(df) - 5))
-        hr()
-        print(raw_df.tail(len(df) - 5))
 
 
 # Function to read the raw Excel file
@@ -412,7 +406,7 @@ dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[16]
+fname = fnames[17]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
