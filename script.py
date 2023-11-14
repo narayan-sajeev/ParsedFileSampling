@@ -285,7 +285,8 @@ def process_date(date):
     # Convert the date column to a string
     date = str(date).split('：')[-1]
     date = date.replace('加工日期', '').replace('检疫日期', '').replace('购进日期', '')
-    date = date[:10].replace('//', '').replace('/', '-').replace('.', '-').replace('D', '')
+    date = date[:10].replace('//', '').replace('/', '-').replace('.', '-')
+    date = date.replace('T', '').replace('J', '').replace('D', '')
     # If the last character is a '-', remove it
     if date[-1] == '-':
         date = date[:-1]
@@ -322,7 +323,8 @@ def debug(l1, l2):
 # Function to drop common columns
 def drop_common(df, raw_df):
     # Process the production date columns
-    for col in ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号']:
+    for col in ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
+                '生产日期（批号）']:
         # Try to process the date column
         try:
             # Apply the process_date function to the date column
@@ -428,7 +430,7 @@ dir = ROOT + 'Tianjin_Tianjin_msb_20220625'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[6]
+fname = fnames[9]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
