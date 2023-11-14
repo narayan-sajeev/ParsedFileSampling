@@ -405,27 +405,27 @@ def drop_common(df, raw_df):
 
 
 # list of file names to be read in
-fnames = ['201914.xls.pkl.gz', '附件2-合格-2019年11号食品抽检信息.xlsx.pkl.gz',
-          '附件2-合格-2019年25号信息公布.xlsx.pkl.gz', '附件2-合格-2019年28号食品抽检信息公布.xlsx.pkl.gz',
-          '附件2-合格-2019年31号信息公布.xlsx.pkl.gz', '附件2-合格-2019年35号信息公布.xlsx.pkl.gz',
-          '附件2-合格-2019年38号信息公布.xlsx.pkl.gz', '附件2-合格-2019年41号信息公布.xlsx.pkl.gz',
-          '附件2-合格-2019年44号信息公布1.xlsx.pkl.gz', '附件2-合格-2019年47号信息公布.xlsx.pkl.gz',
-          '附件2-合格-2019年50号信息公布.xlsx.pkl.gz', '附件2-合格-2019年56号信息公布.xlsx.pkl.gz',
-          '附件2-合格-2019年9号信息公布.xlsx.pkl.gz', '附件2-合格-2020年8号信息公布.xlsx.pkl.gz',
-          '附件3-不合格-2019年11号食品抽检信息.xlsx.pkl.gz', '附件3-不合格-2019年38号信息公布.xlsx.pkl.gz',
-          '附件3-不合格-2019年46号信息公布.xlsx.pkl.gz', '附件3-不合格-2019年47号信息公布.xlsx.pkl.gz',
-          '附件3-不合格-2019年53号信息公布.xlsx.pkl.gz', '附件3-不合格-2019年6号食品抽检信息.xlsx.pkl.gz',
-          '附件3-不合格-2019年8号信息公布.xlsx.pkl.gz', '附件3-不合格-2020年12号信息公布.xlsx.pkl.gz',
-          '附件3-不合格-2020年15号信息公布.xlsx.pkl.gz', '附件3-不合格-2020年4号信息公布.xlsx.pkl.gz',
-          '附件3-不合格-2020年8号信息公布.xlsx.pkl.gz']
+fnames = ['174438食品抽检合格-乳制品.xls.pkl.gz', '174746食品抽检不合格-食用农产品.xls.pkl.gz',
+          '175414食品抽检合格-蛋制品.xls.pkl.gz', '175437食品抽检合格-粮食加工品.xls.pkl.gz',
+          '181120附件6.方便监督抽检产品合格信息.xls.pkl.gz', '182753附件4_方便食品监督抽检合格产品信息.xls.pkl.gz',
+          '183442食品监督抽检合格产品信息.xls.pkl.gz', '184046速冻食品监督抽检合格产品信息.xls.pkl.gz',
+          '184111婴幼儿配方乳粉监督抽检合格产品信息.xls.pkl.gz', '184528合格产品信息.xls.pkl.gz',
+          '184541合格产品信息.xls.pkl.gz', '185138合格产品信息.xls.pkl.gz',
+          '婴幼儿配方乳粉监督抽检合格产品信息.xlsx.pkl.gz', '糖果制品监督抽检不合格产品信息.xls.pkl.gz',
+          '膨化食品监督抽检不合格产品信息.xls.pkl.gz', '蛋制品监督抽检信息.xls.pkl.gz',
+          '调味品监督抽检合格产品信息.xls.pkl.gz', '附件19_罐头监督抽检合格产品信息.xls.pkl.gz',
+          '附件2_豆制品监督抽检合格产品信息.xlsx.pkl.gz', '附件4_食品添加剂监督抽检合格产品信息.xls.pkl.gz',
+          '附件5.豆制品监督抽检产品合格信息.xls.pkl.gz', '附件6_糕点监督抽检合格产品信息.xls.pkl.gz',
+          '附件7_糖果制品监督抽检合格产品信息.xls.pkl.gz', '附件8.调味品监督抽检产品合格信息.xls.pkl.gz',
+          '附件8.食用油、油脂及其制品监督抽检产品合格信息.xls.pkl.gz']
 
 # Define the directory where the parsed files are located
-dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
+dir = ROOT + 'Tianjin_Tianjin_msb_20220625'
 
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[23]
+fname = fnames[0]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
