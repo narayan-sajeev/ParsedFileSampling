@@ -221,7 +221,7 @@ def get_path(dir, fname):
 
 
 # Function to print the dataframe
-def print_df(df):
+def print_df(df, raw_df):
     # Print the file path
     s = 'open %s' % get_path(dir, fname)
     txt = s.split('/')[-1]
@@ -244,15 +244,21 @@ def print_df(df):
     # Print first few rows of the dataframe
     print()
     print(df.head())
+    hr()
+    print(raw_df.head())
 
     # Print last few rows of the dataframe
     if len(df) > 10:
         hr()
         print(df.tail())
+        hr()
+        print(raw_df.tail())
 
     elif len(df) > 5:
         hr()
         print(df.tail(len(df) - 5))
+        hr()
+        print(raw_df.tail(len(df) - 5))
 
 
 # Function to read the raw Excel file
@@ -406,7 +412,7 @@ dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[18]
+fname = fnames[19]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
@@ -424,4 +430,4 @@ df = drop_columns(df, review_cols)
 raw_df, df = drop_common(df, raw_df)
 
 # Print the dataframe
-print_df(df)
+print_df(df, raw_df)
