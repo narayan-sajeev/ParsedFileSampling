@@ -281,7 +281,7 @@ def process_date(date):
         return None
     # Convert the date column to a string
     date = str(date).split('：')[-1]
-    date = date.replace('加工日期', '')
+    date = date.replace('加工日期', '').replace('检疫日期', '').replace('购进日期', '')
     date = date[:10].replace('//', '').replace('/', '-').replace('.', '-')
     # If the last character is a '-', remove it
     if date[-1] == '-':
@@ -405,7 +405,7 @@ dir = ROOT + 'Sichuan_Sichuan_msb_20220814'
 # Set pandas option to display all columns
 pd.set_option('display.max_columns', None)
 
-fname = fnames[2]
+fname = fnames[15]
 
 # Read the raw Excel file
 raw_df = read_excel(dir, fname)
