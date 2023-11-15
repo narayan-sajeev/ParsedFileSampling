@@ -222,3 +222,23 @@ def get_path(dir, fname):
 def debug(l1, l2):
     for i, _ in enumerate(l1):
         print(_, l2[i], _ == l2[i])
+
+
+def read_excel(directory, file_name):
+    """
+    Function to read the raw Excel file.
+    """
+    # Read the raw Excel file
+    raw_df = pd.read_excel(get_path(directory, file_name))
+    # Get the index of the first occurrence
+    try:
+        idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
+        # Set the column headers to be the entries in the row that contains '序号'
+        raw_df.columns = raw_df.iloc[idx]
+        # Remove the row that contains '序号'
+        raw_df = raw_df.loc[idx + 1:]
+    except:
+        pass
+    # Fill all NaN values with '/'
+    raw_df = raw_df.fillna('/')
+    return raw_df
