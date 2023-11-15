@@ -165,7 +165,7 @@ def drop_common(parsed_df, raw_df):
 NUM = 1
 
 # Initialize the parsed and raw dataframes
-parsed_df, raw_df = init(PROV, FILE_NAMES, NUM - 1)
+parsed_df, raw_df = init(PROV, FILE_NAMES, NUM)
 
 # Drop common columns from the dataframe
 raw_df, parsed_df = drop_common(parsed_df, raw_df)

@@ -266,6 +266,8 @@ def init(PROV, FILE_NAMES, NUM):
     global DIR
     DIR = ROOT_DIR + PROV
 
+    NUM -= 1
+
     global FILE_NAME
     FILE_NAME = FILE_NAMES[NUM]
 
