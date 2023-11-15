@@ -242,3 +242,35 @@ def read_excel(directory, file_name):
     # Fill all NaN values with '/'
     raw_df = raw_df.fillna('/')
     return raw_df
+
+
+def print_fname(DIR, FILE_NAME):
+    string = 'open %s' % get_path(DIR, FILE_NAME)
+    string = string.split('/')[-1]
+    print(string)
+    return string
+
+
+def print_head(df):
+    """
+    Function to print the first few rows of the dataframe.
+    """
+    # Print first few rows of the dataframe
+    print()
+    print(df.head())
+    hr()
+
+
+def print_tail(df):
+    """
+    Function to print the last few rows of the dataframe.
+    """
+
+    # Print last few rows of the dataframe
+    if len(df) > 10:
+        print(df.tail())
+
+    elif len(df) > 5:
+        print(df.tail(len(df) - 5))
+
+    hr()

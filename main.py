@@ -86,8 +86,7 @@ def process_df(df):
     replacements = {
         '，': '_',
         ',': '_',
-        '\t': '',
-        '/': None
+        '\t': ''
     }
 
     # Apply the replacements
@@ -196,49 +195,38 @@ def drop_common(parsed_df, raw_df):
     return raw_df, parsed_df
 
 
-def print_df(parsed_df, raw_df):
+def print_results(parsed_df, raw_df):
     """
     Function to print the dataframe.
     """
     # Print the file path
-    s = 'open %s' % get_path(DIR, FILE_NAME)
-    txt = s.split('/')[-1]
-    print(txt)
+
+    file_path = print_fname(DIR, FILE_NAME)
 
     # Drop columns that have all duplicate cells
     no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
 
-    # Get the column headers
-    cols = list(parsed_df.columns)
-
     # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
-    if len(cols) < 1 or cols == ['inspection_results'] or len(no_dup_df.columns) < 1:
-        quit()
+    if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
+        return
 
     # Set the dataframe to be the dataframe with no duplicate columns
     parsed_df = no_dup_df
 
     # Open the file
-    os.system(s)
+    os.system(file_path)
 
-    # Print first few rows of the dataframe
-    print()
-    print(parsed_df.head())
+    # Print first few rows of the dataframes
+    print_head(parsed_df)
+    print_head(raw_df)
+
+    # Print last few rows of the dataframes
+    print_tail(parsed_df)
+    print_tail(raw_df)
+
+    print("\n", parsed_df.head())
     hr()
     print(raw_df.head())
-
-    # Print last few rows of the dataframe
-    if len(parsed_df) > 10:
-        hr()
-        print(parsed_df.tail())
-        hr()
-        print(raw_df.tail())
-
-    elif len(parsed_df) > 5:
-        hr()
-        print(parsed_df.tail(len(parsed_df) - 5))
-        hr()
-        print(raw_df.tail(len(parsed_df) - 5))
 
 
 # Read the raw Excel file
@@ -256,5 +244,5 @@ parsed_df = drop_columns(parsed_df, review_cols)
 # Drop common columns from the dataframe
 raw_df, parsed_df = drop_common(parsed_df, raw_df)
 
-# Print the dataframe
-print_df(parsed_df, raw_df)
+# Print the results
+print_results(parsed_df, raw_df)
