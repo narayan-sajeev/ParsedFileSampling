@@ -78,13 +78,38 @@ def process_date(date):
     return date
 
 
+def process_df(df):
+    """
+    Helper function to process a dataframe.
+    """
+    # Define the replacements
+    replacements = {
+        '，': '_',
+        ',': '_',
+        '\t': '',
+        '/': None
+    }
+
+    # Apply the replacements
+    for old, new in replacements.items():
+        df = df.applymap(lambda x: x.replace(old, new) if isinstance(x, str) else x)
+
+    # Fill all NaN values with '/'
+    df = df.fillna('/')
+    # Replace all '/' with None
+    df = df.applymap(lambda x: None if x == '/' else x)
+
+    return df
+
+
 def drop_common(parsed_df, raw_df):
     """
     Function to drop common columns.
     """
     # Process the production date columns
-    for col in ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
-                '生产日期（批号）', '生产日期/批号/购进日期']:
+    date_cols = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
+                 '生产日期（批号）', '生产日期/批号/购进日期']
+    for col in date_cols:
         # Try to process the date column
         try:
             # Apply the process_date function to the date column
@@ -92,38 +117,10 @@ def drop_common(parsed_df, raw_df):
         except:
             pass
 
-    # Strip all whitespace characters from the parsed dataframe
-    parsed_df = parsed_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-    # Replace all '，' with '_'
-    parsed_df = parsed_df.applymap(lambda x: x.replace('，', '_') if isinstance(x, str) else x)
-    # Replace all ',' with '_'
-    parsed_df = parsed_df.applymap(lambda x: x.replace(',', '_') if isinstance(x, str) else x)
-    # Replace all '\t' with ''
-    parsed_df.replace('\t', '', regex=True, inplace=True)
-    # Fill all NaN values with '/'
-    parsed_df = parsed_df.fillna('/')
-    # Replace all '/' with None
-    parsed_df = parsed_df.applymap(lambda x: None if x == '/' else x)
+    # Process the dataframes
+    parsed_df = process_df(parsed_df)
+    raw_df = process_df(raw_df)
 
-    # Try to process the production date column
-    try:
-        # Apply the process_date function to the production date column
-        parsed_df['production_date'] = parsed_df['production_date'].apply(process_date)
-    except:
-        pass
-
-    # Strip all whitespace characters from the raw dataframe
-    raw_df = raw_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-    # Replace all '，' with '_'
-    raw_df = raw_df.applymap(lambda x: x.replace('，', '_') if isinstance(x, str) else x)
-    # Replace all ',' with '_'
-    raw_df = raw_df.applymap(lambda x: x.replace(',', '_') if isinstance(x, str) else x)
-    # Replace all '\t' with ''
-    raw_df.replace('\t', '', regex=True, inplace=True)
-    # Fill all NaN values with '/'
-    raw_df = raw_df.fillna('/')
-    # Replace all '/' with None
-    raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
     # Replace all pd.NaT with None
     raw_df = raw_df.replace({pd.NaT: None})
 
