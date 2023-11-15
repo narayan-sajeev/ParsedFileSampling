@@ -251,6 +251,9 @@ def init(DIR, FILE_NAME):
     # Ignore all warnings
     warnings.filterwarnings("ignore")
 
+    # Set pandas option to display all columns
+    pd.set_option('display.max_columns', None)
+
     # Read the raw Excel file
     raw_df = read_excel(DIR, FILE_NAME)
 

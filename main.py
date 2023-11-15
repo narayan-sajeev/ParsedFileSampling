@@ -22,9 +22,6 @@ FILE_NAMES = ['023101.xlsx.pkl.gz', '023352.xls.pkl.gz', '023402.xls.pkl.gz', '0
 # Define the directory where the parsed files are located
 DIR = ROOT_DIR + 'Tibet_Tibet_msb_20220317'
 
-# Set pandas option to display all columns
-pd.set_option('display.max_columns', None)
-
 FILE_NAME = FILE_NAMES[0]
 
 
