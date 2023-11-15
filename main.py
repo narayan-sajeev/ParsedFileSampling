@@ -1,12 +1,8 @@
 # Import necessary libraries
 import re
-import warnings
 from datetime import datetime
 
 from utils import *
-
-# Ignore all warnings
-warnings.filterwarnings("ignore")
 
 # Define the root directory where the parsed files are located
 ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
@@ -173,6 +169,7 @@ def drop_common(parsed_df, raw_df):
     return raw_df, parsed_df
 
 
+# Initialize the parsed and raw dataframes
 parsed_df, raw_df = init(DIR, FILE_NAME)
 
 # Drop common columns from the dataframe

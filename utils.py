@@ -2,6 +2,7 @@
 import json
 import os
 import random
+import warnings
 
 import pandas as pd
 
@@ -247,6 +248,9 @@ def read_excel(directory, file_name):
 
 
 def init(DIR, FILE_NAME):
+    # Ignore all warnings
+    warnings.filterwarnings("ignore")
+
     # Read the raw Excel file
     raw_df = read_excel(DIR, FILE_NAME)
 
