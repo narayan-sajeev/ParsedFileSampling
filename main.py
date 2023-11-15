@@ -123,7 +123,8 @@ def drop_common(parsed_df, raw_df):
     if unique_rows == len(raw_df):
         print('1\t0/%s\t1' % len(parsed_df))
 
-    # If the number of rows in the raw dataframe is the same as the number of rows in the dataframe with all empty rows dropped
+    # If the number of rows in the raw dataframe is the same as the number of rows in the dataframe with all empty
+    # rows dropped
     elif len(drop_empty) == len(parsed_df):
         print('1\t0/%s\t1' % len(parsed_df))
         raw_df = drop_empty
@@ -172,17 +173,7 @@ def drop_common(parsed_df, raw_df):
     return raw_df, parsed_df
 
 
-# Read the raw Excel file
-raw_df = read_excel(DIR, FILE_NAME)
-
-# Read the dataframe from the pickle file
-parsed_df = get_df(DIR, FILE_NAME)
-
-# Check substrings for unmatched columns
-review_cols = substring(parsed_df, get_known_cols(), raw_df.columns)
-
-# Drop unnecessary columns from the dataframe
-parsed_df = drop_columns(parsed_df, review_cols)
+parsed_df, raw_df = init(DIR, FILE_NAME)
 
 # Drop common columns from the dataframe
 raw_df, parsed_df = drop_common(parsed_df, raw_df)

@@ -59,7 +59,10 @@ def substr_check(substr_sets, k):
 
 
 # Function to check substrings for unmatched columns
-def substring(df, known_cols, col_headers):
+def substring(df, col_headers):
+
+    known_cols = get_known_cols()
+
     # Clean up the column headers
     col_headers = clean(col_headers)
 
@@ -243,6 +246,20 @@ def read_excel(directory, file_name):
     raw_df = raw_df.fillna('/')
     return raw_df
 
+def init(DIR, FILE_NAME):
+    # Read the raw Excel file
+    raw_df = read_excel(DIR, FILE_NAME)
+
+    # Read the dataframe from the pickle file
+    parsed_df = get_df(DIR, FILE_NAME)
+
+    # Check substrings for unmatched columns
+    review_cols = substring(parsed_df, raw_df.columns)
+
+    # Drop unnecessary columns from the dataframe
+    parsed_df = drop_columns(parsed_df, review_cols)
+
+    return parsed_df, raw_df
 
 def process_df(df):
     """
