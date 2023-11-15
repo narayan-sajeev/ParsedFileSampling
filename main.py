@@ -1,93 +1,58 @@
 # Import necessary libraries
-import json
-import os
-import random
 import warnings
 from datetime import datetime
-from utils import *
 
-import pandas as pd
+from utils import *
 
 # Ignore all warnings
 warnings.filterwarnings("ignore")
 
 # Define the root directory where the parsed files are located
-ROOT = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
+ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
+
+# List of file names to be read in
+FILE_NAMES = ['023101.xlsx.pkl.gz', '023352.xls.pkl.gz', '023402.xls.pkl.gz', '023405.xls.pkl.gz', '023407.xls.pkl.gz',
+              '023409.xls.pkl.gz', '023411.xls.pkl.gz', '023413.xls.pkl.gz',
+              '023428监督抽检（国抽）合格_不合格产品信息统计表.xls.pkl.gz',
+              '1.西藏自治区２０２１年月饼抽检合格产品信息.xlsx.pkl.gz',
+              '2021年产品质量自治区专项监督抽查检验结果送达公告名单.xls.pkl.gz',
+              '2021年产品质量自治区监督抽查检验结果送达公告名单.xlsx.pkl.gz',
+              '监督抽检（国抽）合格_不合格产品信息统计表.xls.pkl.gz',
+              '监督抽检（省抽）合格_不合格产品信息统计表.xls.pkl.gz',
+              '监督抽检（省检）合格_不合格产品信息表.xls.pkl.gz', '送达公告附件.xlsx.pkl.gz',
+              '２.西藏自治区２０２１年月饼抽检不合格产品信息.xlsx.pkl.gz']
+
+# Define the directory where the parsed files are located
+DIR = ROOT_DIR + 'Tibet_Tibet_msb_20220317'
+
+# Set pandas option to display all columns
+pd.set_option('display.max_columns', None)
+
+FILE_NAME = FILE_NAMES[0]
 
 
-# Function to print the dataframe
-def print_df(df, raw_df):
-    # Print the file path
-    s = 'open %s' % get_path(dir, fname)
-    txt = s.split('/')[-1]
-    print(txt)
-
-    # Drop columns that have all duplicate cells
-    no_dup_df = df.loc[:, df.nunique() != 1]
-
-    cols = list(df.columns)
-
-    # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
-    if len(cols) < 1 or cols == ['inspection_results'] or len(no_dup_df.columns) < 1:
-        quit()
-
-    df = no_dup_df
-
-    # Open the file
-    os.system(s)
-
-    # Print first few rows of the dataframe
-    print()
-    print(df.head())
-    hr()
-    print(raw_df.head())
-
-    # Print last few rows of the dataframe
-    if len(df) > 10:
-        hr()
-        print(df.tail())
-        hr()
-        print(raw_df.tail())
-
-    elif len(df) > 5:
-        hr()
-        print(df.tail(len(df) - 5))
-        hr()
-        print(raw_df.tail(len(df) - 5))
-
-
-# Function to read the raw Excel file
-def read_excel(dir, fname):
-    # Read the raw Excel file
-    raw_df = pd.read_excel(get_path(dir, fname))
-    # Get the index of the first occurrence
-    try:
-        idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
-        # Set the column headers to be the entries in the row that contains '序号'
-        raw_df.columns = raw_df.iloc[idx]
-        raw_df = raw_df.loc[idx + 1:]
-    except:
-        pass
-    raw_df = raw_df.fillna('/')
-    return raw_df
-
-
-# Function to process the date column
 def process_date(date):
+    """
+    Function to process the date column.
+    """
     # If the date column is empty, return None
     if date in ['/', '-']:
         return None
     # Convert the date column to a string
     date = str(date).split('：')[-1].strip()
+    # Remove the first character if it's a '/'
     if date.startswith('/'):
         date = date[1:]
+    # Remove '加工日期', '检疫日期', '购进日期' from the date column
     date = date.replace('加工日期', '').replace('检疫日期', '').replace('购进日期', '')
+    # Remove all spaces, '/', '.', and '-'
     date = date[:10].replace(' ', '').replace('//', '').replace('/', '-').replace('.', '-')
+    # Remove 'T', 'J', and 'D'
     date = date.replace('T', '').replace('J', '').replace('D', '')
     # If the last character is a '-', remove it
     if date[-1] == '-':
         date = date[:-1]
-    # If the last character is a '-', remove it
+    # If '～' is in the date column, remove everything after it
     if '～' in date:
         date = date.split('～')[0]
     # Replace '年' and '月' with '-'
@@ -95,7 +60,9 @@ def process_date(date):
     # Remove the last character if it's not a digit
     if not date[-1].isdigit():
         date = date[:-1]
+    # Remove everything after the first space
     date = date.split()[0]
+    # If the date column has only one '-'
     if date.count('-') == 1:
         return None
     # If the date is an integer
@@ -107,14 +74,17 @@ def process_date(date):
             return None
     # Format the date column
     date = '-'.join(date.split('-')[:3])
+    # Try to convert the date to a datetime object
     try:
         return datetime.strptime(date, '%Y-%m%d').strftime('%Y-%m-%d')
     except:
         pass
+    # Try to convert the date to a datetime object
     try:
         return datetime.strptime(date, '%m-%d-%Y').strftime('%Y-%m-%d')
     except:
         pass
+    # Try to convert the date to a datetime object
     try:
         return datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
     # Return the original value
@@ -122,8 +92,30 @@ def process_date(date):
         return date
 
 
-# Function to drop common columns
-def drop_common(df, raw_df):
+def read_excel(directory, file_name):
+    """
+    Function to read the raw Excel file.
+    """
+    # Read the raw Excel file
+    raw_df = pd.read_excel(get_path(directory, file_name))
+    # Get the index of the first occurrence
+    try:
+        idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
+        # Set the column headers to be the entries in the row that contains '序号'
+        raw_df.columns = raw_df.iloc[idx]
+        # Remove the row that contains '序号'
+        raw_df = raw_df.loc[idx + 1:]
+    except:
+        pass
+    # Fill all NaN values with '/'
+    raw_df = raw_df.fillna('/')
+    return raw_df
+
+
+def drop_common(parsed_df, raw_df):
+    """
+    Function to drop common columns.
+    """
     # Process the production date columns
     for col in ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
                 '生产日期（批号）', '生产日期/批号/购进日期']:
@@ -134,47 +126,67 @@ def drop_common(df, raw_df):
         except:
             pass
 
-    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-    df = df.applymap(lambda x: x.replace('，', '_') if isinstance(x, str) else x)
-    df = df.applymap(lambda x: x.replace(',', '_') if isinstance(x, str) else x)
-    df.replace('\t', '', regex=True, inplace=True)
-    df = df.fillna('/')
-    df = df.applymap(lambda x: None if x == '/' else x)
+    # Strip all whitespace characters from the parsed dataframe
+    parsed_df = parsed_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    # Replace all '，' with '_'
+    parsed_df = parsed_df.applymap(lambda x: x.replace('，', '_') if isinstance(x, str) else x)
+    # Replace all ',' with '_'
+    parsed_df = parsed_df.applymap(lambda x: x.replace(',', '_') if isinstance(x, str) else x)
+    # Replace all '\t' with ''
+    parsed_df.replace('\t', '', regex=True, inplace=True)
+    # Fill all NaN values with '/'
+    parsed_df = parsed_df.fillna('/')
+    # Replace all '/' with None
+    parsed_df = parsed_df.applymap(lambda x: None if x == '/' else x)
 
+    # Try to process the production date column
     try:
-        df['production_date'] = df['production_date'].apply(process_date)
+        # Apply the process_date function to the production date column
+        parsed_df['production_date'] = parsed_df['production_date'].apply(process_date)
     except:
         pass
 
+    # Strip all whitespace characters from the raw dataframe
     raw_df = raw_df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    # Replace all '，' with '_'
     raw_df = raw_df.applymap(lambda x: x.replace('，', '_') if isinstance(x, str) else x)
+    # Replace all ',' with '_'
     raw_df = raw_df.applymap(lambda x: x.replace(',', '_') if isinstance(x, str) else x)
+    # Replace all '\t' with ''
     raw_df.replace('\t', '', regex=True, inplace=True)
+    # Fill all NaN values with '/'
     raw_df = raw_df.fillna('/')
+    # Replace all '/' with None
     raw_df = raw_df.applymap(lambda x: None if x == '/' else x)
+    # Replace all pd.NaT with None
     raw_df = raw_df.replace({pd.NaT: None})
 
+    # Try to split the '不合格项目‖检验结果‖标准值' column into three columns
     try:
         raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df["不合格项目‖检验结果‖标准值"].str.split('‖',
                                                                                                                expand=True)
     except:
         pass
 
-    unique_rows = len(df)
+    # Find the number of unique rows to be the number of rows in the parsed dataframe
+    unique_rows = len(parsed_df)
 
+    # Drop all rows that have all NaN values
     drop_empty = raw_df.dropna(how='all')
 
+    # Find the number of unique rows to be the number of rows in the parsed dataframe
     try:
-        unique_rows = df['failing_results'].nunique()
+        unique_rows = parsed_df['failing_results'].nunique()
     except:
         pass
 
     # If the number of unique rows in the parsed dataframe is the same as the number of rows in the raw dataframe
     if unique_rows == len(raw_df):
-        print('1\t0/%s\t1' % len(df))
+        print('1\t0/%s\t1' % len(parsed_df))
 
-    elif len(drop_empty) == len(df):
-        print('1\t0/%s\t1' % len(df))
+    # If the number of rows in the raw dataframe is the same as the number of rows in the dataframe with all empty rows dropped
+    elif len(drop_empty) == len(parsed_df):
+        print('1\t0/%s\t1' % len(parsed_df))
         raw_df = drop_empty
 
     else:
@@ -185,15 +197,19 @@ def drop_common(df, raw_df):
     drop_cols = []
 
     # Drop columns that are common to both the parsed and raw dataframes
-    for col1 in df.columns:
+    for col1 in parsed_df.columns:
+        # Iterate through the columns in the raw dataframe
         for col2 in raw_df.columns:
-            l1 = list(df[col1])
+            # Get the lists of cells in the columns
+            l1 = list(parsed_df[col1])
             l2 = list(raw_df[col2])
 
+            # Remove the last row if it contains '注：排名不分先后'
             while '注：排名不分先后' in l1:
-                df = df.iloc[:-1]
-                l1 = list(df[col1])
+                parsed_df = parsed_df.iloc[:-1]
+                l1 = list(parsed_df[col1])
 
+            # Remove the last row if it contains '注：排名不分先后'
             while '注：排名不分先后' in l2:
                 raw_df = raw_df.iloc[:-1]
                 l2 = list(raw_df[col2])
@@ -204,50 +220,78 @@ def drop_common(df, raw_df):
                 drop_cols.append(col1)
                 break
 
+            # If the column headers are the same, print the column headers
             elif col1 == col2:
                 debug(l1, l2)
 
     # Drop the columns from the dataframe
-    df = df.drop(drop_cols, axis=1)
+    parsed_df = parsed_df.drop(drop_cols, axis=1)
 
-    df = df.applymap(lambda x: None if x == 'Non' else x)
+    # Replace all 'Non' with None
+    parsed_df = parsed_df.applymap(lambda x: None if x == 'Non' else x)
 
-    return raw_df, df
+    return raw_df, parsed_df
 
 
-# list of file names to be read in
-fnames = ['023101.xlsx.pkl.gz', '023352.xls.pkl.gz', '023402.xls.pkl.gz', '023405.xls.pkl.gz', '023407.xls.pkl.gz',
-          '023409.xls.pkl.gz', '023411.xls.pkl.gz', '023413.xls.pkl.gz',
-          '023428监督抽检（国抽）合格_不合格产品信息统计表.xls.pkl.gz',
-          '1.西藏自治区２０２１年月饼抽检合格产品信息.xlsx.pkl.gz',
-          '2021年产品质量自治区专项监督抽查检验结果送达公告名单.xls.pkl.gz',
-          '2021年产品质量自治区监督抽查检验结果送达公告名单.xlsx.pkl.gz',
-          '监督抽检（国抽）合格_不合格产品信息统计表.xls.pkl.gz', '监督抽检（省抽）合格_不合格产品信息统计表.xls.pkl.gz',
-          '监督抽检（省检）合格_不合格产品信息表.xls.pkl.gz', '送达公告附件.xlsx.pkl.gz',
-          '２.西藏自治区２０２１年月饼抽检不合格产品信息.xlsx.pkl.gz']
+def print_df(parsed_df, raw_df):
+    """
+    Function to print the dataframe.
+    """
+    # Print the file path
+    s = 'open %s' % get_path(DIR, FILE_NAME)
+    txt = s.split('/')[-1]
+    print(txt)
 
-# Define the directory where the parsed files are located
-dir = ROOT + 'Tibet_Tibet_msb_20220317'
+    # Drop columns that have all duplicate cells
+    no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
 
-# Set pandas option to display all columns
-pd.set_option('display.max_columns', None)
+    # Get the column headers
+    cols = list(parsed_df.columns)
 
-fname = fnames[0]
+    # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
+    if len(cols) < 1 or cols == ['inspection_results'] or len(no_dup_df.columns) < 1:
+        quit()
+
+    # Set the dataframe to be the dataframe with no duplicate columns
+    parsed_df = no_dup_df
+
+    # Open the file
+    os.system(s)
+
+    # Print first few rows of the dataframe
+    print()
+    print(parsed_df.head())
+    hr()
+    print(raw_df.head())
+
+    # Print last few rows of the dataframe
+    if len(parsed_df) > 10:
+        hr()
+        print(parsed_df.tail())
+        hr()
+        print(raw_df.tail())
+
+    elif len(parsed_df) > 5:
+        hr()
+        print(parsed_df.tail(len(parsed_df) - 5))
+        hr()
+        print(raw_df.tail(len(parsed_df) - 5))
+
 
 # Read the raw Excel file
-raw_df = read_excel(dir, fname)
+raw_df = read_excel(DIR, FILE_NAME)
 
 # Read the dataframe from the pickle file
-df = get_df(dir, fname)
+parsed_df = get_df(DIR, FILE_NAME)
 
 # Check substrings for unmatched columns
-review_cols = substring(df, get_known_cols(), raw_df.columns)
+review_cols = substring(parsed_df, get_known_cols(), raw_df.columns)
 
 # Drop unnecessary columns from the dataframe
-df = drop_columns(df, review_cols)
+parsed_df = drop_columns(parsed_df, review_cols)
 
 # Drop common columns from the dataframe
-raw_df, df = drop_common(df, raw_df)
+raw_df, parsed_df = drop_common(parsed_df, raw_df)
 
 # Print the dataframe
-print_df(df, raw_df)
+print_df(parsed_df, raw_df)
