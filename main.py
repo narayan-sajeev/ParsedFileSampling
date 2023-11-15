@@ -1,3 +1,4 @@
+import re
 # Import necessary libraries
 import warnings
 from datetime import datetime
@@ -38,58 +39,43 @@ def process_date(date):
     # If the date column is empty, return None
     if date in ['/', '-']:
         return None
-    # Convert the date column to a string
+
+    # Convert the date column to a string and remove unnecessary parts
     date = str(date).split('：')[-1].strip()
-    # Remove the first character if it's a '/'
-    if date.startswith('/'):
-        date = date[1:]
-    # Remove '加工日期', '检疫日期', '购进日期' from the date column
+    date = date.lstrip('/')
     date = date.replace('加工日期', '').replace('检疫日期', '').replace('购进日期', '')
-    # Remove all spaces, '/', '.', and '-'
-    date = date[:10].replace(' ', '').replace('//', '').replace('/', '-').replace('.', '-')
-    # Remove 'T', 'J', and 'D'
+    date = re.sub(r'[ /.-]', '', date[:10])
     date = date.replace('T', '').replace('J', '').replace('D', '')
-    # If the last character is a '-', remove it
-    if date[-1] == '-':
-        date = date[:-1]
-    # If '～' is in the date column, remove everything after it
-    if '～' in date:
-        date = date.split('～')[0]
-    # Replace '年' and '月' with '-'
+    date = date.rstrip('-')
+    date = date.split('～')[0]
     date = date.replace('年', '-').replace('月', '-')
-    # Remove the last character if it's not a digit
-    if not date[-1].isdigit():
-        date = date[:-1]
-    # Remove everything after the first space
+    date = date.rstrip('-')
     date = date.split()[0]
-    # If the date column has only one '-'
+
+    # If the date column has only one '-', return None
     if date.count('-') == 1:
         return None
-    # If the date is an integer
+
+    # If the date is an integer, try to convert it to a datetime object
     if date.isdigit():
         try:
-            # Convert the date to a datetime object
             return datetime.strptime(date, '%Y%m%d').strftime('%Y-%m-%d')
         except:
             return None
+
     # Format the date column
     date = '-'.join(date.split('-')[:3])
-    # Try to convert the date to a datetime object
-    try:
-        return datetime.strptime(date, '%Y-%m%d').strftime('%Y-%m-%d')
-    except:
-        pass
-    # Try to convert the date to a datetime object
-    try:
-        return datetime.strptime(date, '%m-%d-%Y').strftime('%Y-%m-%d')
-    except:
-        pass
-    # Try to convert the date to a datetime object
-    try:
-        return datetime.strptime(date, '%Y-%m-%d').strftime('%Y-%m-%d')
+
+    # Try to convert the date to a datetime object in different formats
+    date_formats = ['%Y-%m%d', '%m-%d-%Y', '%Y-%m-%d']
+    for fmt in date_formats:
+        try:
+            return datetime.strptime(date, fmt).strftime('%Y-%m-%d')
+        except ValueError:
+            pass
+
     # Return the original value
-    except ValueError:
-        return date
+    return date
 
 
 def drop_common(parsed_df, raw_df):
