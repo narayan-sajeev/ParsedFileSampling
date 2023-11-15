@@ -267,7 +267,7 @@ def process_df(df):
     return df
 
 
-def print_fname(DIR, FILE_NAME):
+def print_file_path(DIR, FILE_NAME):
     string = 'open %s' % get_path(DIR, FILE_NAME)
     string = string.split('/')[-1]
     print(string)
@@ -297,3 +297,30 @@ def print_tail(df):
         print(df.tail(len(df) - 5))
 
     hr()
+
+
+def print_results(parsed_df, raw_df, file_path):
+    """
+    Function to print the dataframe.
+    """
+
+    # Drop columns that have all duplicate cells
+    no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
+
+    # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
+    if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
+        return
+
+    # Set the dataframe to be the dataframe with no duplicate columns
+    parsed_df = no_dup_df
+
+    # Open the file
+    os.system(file_path)
+
+    # Print first few rows of the dataframes
+    print_head(parsed_df)
+    print_head(raw_df)
+
+    # Print last few rows of the dataframes
+    print_tail(parsed_df)
+    print_tail(raw_df)

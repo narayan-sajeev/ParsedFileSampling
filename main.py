@@ -172,36 +172,6 @@ def drop_common(parsed_df, raw_df):
     return raw_df, parsed_df
 
 
-def print_results(parsed_df, raw_df):
-    """
-    Function to print the dataframe.
-    """
-    # Print the file path
-
-    file_path = print_fname(DIR, FILE_NAME)
-
-    # Drop columns that have all duplicate cells
-    no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
-
-    # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
-    if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
-        return
-
-    # Set the dataframe to be the dataframe with no duplicate columns
-    parsed_df = no_dup_df
-
-    # Open the file
-    os.system(file_path)
-
-    # Print first few rows of the dataframes
-    print_head(parsed_df)
-    print_head(raw_df)
-
-    # Print last few rows of the dataframes
-    print_tail(parsed_df)
-    print_tail(raw_df)
-
-
 # Read the raw Excel file
 raw_df = read_excel(DIR, FILE_NAME)
 
@@ -217,5 +187,8 @@ parsed_df = drop_columns(parsed_df, review_cols)
 # Drop common columns from the dataframe
 raw_df, parsed_df = drop_common(parsed_df, raw_df)
 
+# Print the file path
+file_path = print_file_path(DIR, FILE_NAME)
+
 # Print the results
-print_results(parsed_df, raw_df)
+print_results(parsed_df, raw_df, file_path)
