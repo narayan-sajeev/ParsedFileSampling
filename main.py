@@ -4,9 +4,6 @@ from datetime import datetime
 
 from utils import *
 
-# Define the root directory where the parsed files are located
-ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
-
 # List of file names to be read in
 FILE_NAMES = ['023101.xlsx.pkl.gz', '023352.xls.pkl.gz', '023402.xls.pkl.gz', '023405.xls.pkl.gz', '023407.xls.pkl.gz',
               '023409.xls.pkl.gz', '023411.xls.pkl.gz', '023413.xls.pkl.gz',
@@ -19,10 +16,8 @@ FILE_NAMES = ['023101.xlsx.pkl.gz', '023352.xls.pkl.gz', '023402.xls.pkl.gz', '0
               '监督抽检（省检）合格_不合格产品信息表.xls.pkl.gz', '送达公告附件.xlsx.pkl.gz',
               '２.西藏自治区２０２１年月饼抽检不合格产品信息.xlsx.pkl.gz']
 
-# Define the directory where the parsed files are located
-DIR = ROOT_DIR + 'Tibet_Tibet_msb_20220317'
-
-FILE_NAME = FILE_NAMES[0]
+# Province name
+PROV = 'Tibet_Tibet_msb_20220317'
 
 
 def process_date(date):
@@ -166,11 +161,14 @@ def drop_common(parsed_df, raw_df):
     return raw_df, parsed_df
 
 
+# Set current file number
+NUM = 1
+
 # Initialize the parsed and raw dataframes
-parsed_df, raw_df = init(DIR, FILE_NAME)
+parsed_df, raw_df = init(PROV, FILE_NAMES, NUM - 1)
 
 # Drop common columns from the dataframe
 raw_df, parsed_df = drop_common(parsed_df, raw_df)
 
 # Print the results
-print_results(DIR, FILE_NAME, parsed_df, raw_df)
+print_results(parsed_df, raw_df)

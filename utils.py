@@ -6,6 +6,15 @@ import warnings
 
 import pandas as pd
 
+# Define the root directory where the parsed files are located
+ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
+
+# Define the directory where the parsed files are located
+DIR = ''
+
+# Define the file name
+FILE_NAME = ''
+
 
 def get_all_fnames(DIR):
     current = []
@@ -29,9 +38,9 @@ def get_all_fnames(DIR):
 
 
 # Function to read a dataframe from a pickle file
-def get_df(DIR, fname):
+def get_df():
     # read in the first file from the list using pandas
-    return pd.read_pickle('%s/%s' % (DIR, fname))
+    return pd.read_pickle('%s/%s' % (DIR, FILE_NAME))
 
 
 # Function to get known column classifiers from a JSON file
@@ -218,8 +227,8 @@ def hr():
 
 
 # Function to get the file path
-def get_path(dir, fname):
-    return '%s/%s' % (dir, fname.split('.pkl')[0])
+def get_path():
+    return '%s/%s' % (DIR, FILE_NAME.split('.pkl')[0])
 
 
 def debug(l1, l2):
@@ -227,12 +236,12 @@ def debug(l1, l2):
         print(_, l2[i], _ == l2[i])
 
 
-def read_excel(directory, file_name):
+def read_excel():
     """
     Function to read the raw Excel file.
     """
     # Read the raw Excel file
-    raw_df = pd.read_excel(get_path(directory, file_name))
+    raw_df = pd.read_excel(get_path())
     # Get the index of the first occurrence
     try:
         idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
@@ -247,18 +256,24 @@ def read_excel(directory, file_name):
     return raw_df
 
 
-def init(DIR, FILE_NAME):
+def init(PROV, FILE_NAMES, NUM):
     # Ignore all warnings
     warnings.filterwarnings("ignore")
 
     # Set pandas option to display all columns
     pd.set_option('display.max_columns', None)
 
+    global DIR
+    DIR = ROOT_DIR + PROV
+
+    global FILE_NAME
+    FILE_NAME = FILE_NAMES[NUM]
+
     # Read the raw Excel file
-    raw_df = read_excel(DIR, FILE_NAME)
+    raw_df = read_excel()
 
     # Read the dataframe from the pickle file
-    parsed_df = get_df(DIR, FILE_NAME)
+    parsed_df = get_df()
 
     # Check substrings for unmatched columns
     review_cols = substring(parsed_df, raw_df.columns)
@@ -292,8 +307,8 @@ def process_df(df):
     return df
 
 
-def print_file_path(DIR, FILE_NAME):
-    string = 'open %s' % get_path(DIR, FILE_NAME)
+def print_file_path():
+    string = 'open %s' % get_path()
     string = string.split('/')[-1]
     print(string)
     return string
@@ -351,13 +366,13 @@ def print_df(parsed_df, raw_df, file_path):
     print_tail(raw_df)
 
 
-def print_results(DIR, FILE_NAME, parsed_df, raw_df):
+def print_results(parsed_df, raw_df):
     """
     Function to print the results.
     """
 
     # Print the file path
-    file_path = print_file_path(DIR, FILE_NAME)
+    file_path = print_file_path()
 
     # Print the dataframe
     print_df(parsed_df, raw_df, file_path)
