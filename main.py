@@ -92,9 +92,6 @@ def process_date(date):
         return date
 
 
-
-
-
 def drop_common(parsed_df, raw_df):
     """
     Function to drop common columns.
