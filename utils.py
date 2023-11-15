@@ -244,6 +244,29 @@ def read_excel(directory, file_name):
     return raw_df
 
 
+def process_df(df):
+    """
+    Helper function to process a dataframe.
+    """
+    # Define the replacements
+    replacements = {
+        '，': '_',
+        ',': '_',
+        '\t': ''
+    }
+
+    # Apply the replacements
+    for old, new in replacements.items():
+        df = df.applymap(lambda x: x.replace(old, new) if isinstance(x, str) else x)
+
+    # Fill all NaN values with '/'
+    df = df.fillna('/')
+    # Replace all '/' with None
+    df = df.applymap(lambda x: None if x == '/' else x)
+
+    return df
+
+
 def print_fname(DIR, FILE_NAME):
     string = 'open %s' % get_path(DIR, FILE_NAME)
     string = string.split('/')[-1]

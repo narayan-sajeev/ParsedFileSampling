@@ -78,29 +78,6 @@ def process_date(date):
     return date
 
 
-def process_df(df):
-    """
-    Helper function to process a dataframe.
-    """
-    # Define the replacements
-    replacements = {
-        '，': '_',
-        ',': '_',
-        '\t': ''
-    }
-
-    # Apply the replacements
-    for old, new in replacements.items():
-        df = df.applymap(lambda x: x.replace(old, new) if isinstance(x, str) else x)
-
-    # Fill all NaN values with '/'
-    df = df.fillna('/')
-    # Replace all '/' with None
-    df = df.applymap(lambda x: None if x == '/' else x)
-
-    return df
-
-
 def drop_common(parsed_df, raw_df):
     """
     Function to drop common columns.
@@ -223,10 +200,6 @@ def print_results(parsed_df, raw_df):
     # Print last few rows of the dataframes
     print_tail(parsed_df)
     print_tail(raw_df)
-
-    print("\n", parsed_df.head())
-    hr()
-    print(raw_df.head())
 
 
 # Read the raw Excel file
