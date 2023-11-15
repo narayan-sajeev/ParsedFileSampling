@@ -178,8 +178,5 @@ parsed_df, raw_df = init(DIR, FILE_NAME)
 # Drop common columns from the dataframe
 raw_df, parsed_df = drop_common(parsed_df, raw_df)
 
-# Print the file path
-file_path = print_file_path(DIR, FILE_NAME)
-
 # Print the results
-print_results(parsed_df, raw_df, file_path)
+print_results(DIR, FILE_NAME, parsed_df, raw_df)
