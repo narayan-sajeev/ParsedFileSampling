@@ -310,10 +310,10 @@ def process_df(df):
 
 
 def print_file_path():
-    string = 'open %s' % get_path()
-    string = string.split('/')[-1]
-    print(string)
-    return string
+    path = 'open %s' % get_path()
+    fname = path.split('/')[-1]
+    print(fname)
+    return path
 
 
 def print_head(df):
