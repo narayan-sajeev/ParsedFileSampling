@@ -75,6 +75,9 @@ def substring(df, col_headers):
     # Clean up the column headers
     col_headers = clean(col_headers)
 
+    # Remove unicode characters
+    col_headers = [s.strip('\u2003') for s in col_headers]
+
     bad = ['地市', '检验报告编号', '抽查结果']
 
     try:
