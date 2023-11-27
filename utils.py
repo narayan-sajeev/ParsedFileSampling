@@ -286,8 +286,18 @@ def init(PROV, FILE_NAMES, NUM):
     # Drop unnecessary columns from the dataframe
     parsed_df = drop_columns(parsed_df, review_cols)
 
+    # Remove whitespace from the column headers
+    raw_df = remove_whitespace(raw_df)
+    parsed_df = remove_whitespace(parsed_df)
+
     return parsed_df, raw_df
 
+def remove_whitespace(df):
+    """
+    Function to remove whitespace from the column headers.
+    """
+    df.columns = df.columns.str.strip()
+    return df
 
 def process_df(df):
     """
