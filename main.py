@@ -25,13 +25,14 @@ def process_date(date):
     Function to process the date column.
     """
     # If the date column is empty, return None
-    if date in ['/', '-']:
+    if date in ['/', '-', '不详']:
         return None
 
     # Convert the date column to a string and remove unnecessary parts
     date = str(date).split('：')[-1].strip()
     date = date.lstrip('/')
     date = date.replace('加工日期', '').replace('检疫日期', '').replace('购进日期', '')
+    date = date.replace('日', '')
     date = re.sub(r'[ /.-]', '', date[:10])
     date = date.replace('T', '').replace('J', '').replace('D', '')
     date = date.rstrip('-')
@@ -81,6 +82,9 @@ def drop_common(parsed_df, raw_df):
             raw_df[col] = raw_df[col].apply(process_date)
         except:
             pass
+
+    # Process the production date columns
+    parsed_df['production_date'] = parsed_df['production_date'].apply(process_date)
 
     # Process the dataframes
     parsed_df = process_df(parsed_df)
@@ -159,17 +163,17 @@ def drop_common(parsed_df, raw_df):
     # Replace all 'Non' with None
     parsed_df = parsed_df.applymap(lambda x: None if x == 'Non' else x)
 
-    return raw_df, parsed_df
+    return parsed_df, raw_df
 
 
 # Set current file number
-NUM = 10
+NUM = 12
 
 # Initialize the parsed and raw dataframes
 parsed_df, raw_df = init(PROV, FILE_NAMES, NUM)
 
 # Drop common columns from the dataframe
-raw_df, parsed_df = drop_common(parsed_df, raw_df)
+parsed_df, raw_df = drop_common(parsed_df, raw_df)
 
 # Print the results
 print_results(parsed_df, raw_df)

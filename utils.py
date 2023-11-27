@@ -292,12 +292,14 @@ def init(PROV, FILE_NAMES, NUM):
 
     return parsed_df, raw_df
 
+
 def remove_whitespace(df):
     """
     Function to remove whitespace from the column headers.
     """
     df.columns = df.columns.str.strip()
     return df
+
 
 def process_df(df):
     """
