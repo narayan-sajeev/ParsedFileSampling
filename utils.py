@@ -237,6 +237,7 @@ def get_path():
 def debug(l1, l2):
     for i, _ in enumerate(l1):
         print(_, l2[i], _ == l2[i])
+        print(type(_), type(l2[i]))
 
 
 def read_excel():

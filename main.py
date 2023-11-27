@@ -25,7 +25,7 @@ def process_date(date):
     Function to process the date column.
     """
     # If the date column is empty, return None
-    if date in ['/', '-', '不详']:
+    if date in ['/', '-', '不详'] or date is None:
         return None
 
     # Convert the date column to a string and remove unnecessary parts
@@ -152,10 +152,6 @@ def drop_common(parsed_df, raw_df):
                 # Add the column to the list of columns to be dropped
                 drop_cols.append(col1)
                 break
-
-            # If the column headers are the same, print the column headers
-            elif col1 == col2:
-                debug(l1, l2)
 
     # Drop the columns from the dataframe
     parsed_df = parsed_df.drop(drop_cols, axis=1)
