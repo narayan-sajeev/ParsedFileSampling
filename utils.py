@@ -78,14 +78,8 @@ def substring(df, col_headers):
     # Remove unicode characters
     col_headers = [s.strip('\u2003') for s in col_headers]
 
-    bad = ['地市', '检验报告编号', '抽查结果']
-
-    try:
-        for _ in bad:
-            while _ in col_headers:
-                col_headers.remove(_)
-    except:
-        pass
+    # Drop unnecessary columns from column headers
+    col_headers = drop_useless_columns(col_headers)
 
     # dictionary of substrings to check for in column headers
     substr_sets = {
@@ -207,21 +201,31 @@ def drop_columns(df, col_headers):
     # Sort column headers
     col_headers = sorted(col_headers)
 
-    # Remove unnecessary column headers
-    for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
-              '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
-              '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地', '任务类别']:
-        try:
-            col_headers.remove(_)
-        except:
-            pass
-
     # Print unmatched and dropped column headers
     if len(dropped) > 0 and len(col_headers) > 0:
         print(col_headers)
         print(dropped)
 
     return drop_df
+
+
+# Drop unnecessary columns from column headers
+def drop_useless_columns(col_headers):
+    # Convert to list
+    col_headers = list(col_headers)
+
+    # Remove unnecessary column headers
+    for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
+              '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
+              '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地', '任务类别', '地市', '检验报告编号',
+              '抽查结果', '户外低帮休闲鞋', '样品名称']:
+        try:
+            while _ in col_headers:
+                col_headers.remove(_)
+        except:
+            pass
+
+    return col_headers
 
 
 # Function to print a horizontal line
@@ -286,6 +290,9 @@ def init(PROV, FILE_NAMES, NUM):
 
     # Drop unnecessary columns from the dataframe
     parsed_df = drop_columns(parsed_df, review_cols)
+    raw_columns = drop_useless_columns(raw_df.columns)
+    # Select only the columns that are in the raw dataframe
+    raw_df = raw_df.loc[:, raw_columns]
 
     # Remove whitespace from the column headers
     raw_df = remove_whitespace(raw_df)

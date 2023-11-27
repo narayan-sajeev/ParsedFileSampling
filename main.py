@@ -83,8 +83,11 @@ def drop_common(parsed_df, raw_df):
         except:
             pass
 
-    # Process the production date columns
-    parsed_df['production_date'] = parsed_df['production_date'].apply(process_date)
+    prod_date = 'production_date'
+
+    if prod_date in parsed_df.columns:
+        # Process the production date columns
+        parsed_df[prod_date] = parsed_df[prod_date].apply(process_date)
 
     # Process the dataframes
     parsed_df = process_df(parsed_df)
@@ -163,7 +166,7 @@ def drop_common(parsed_df, raw_df):
 
 
 # Set current file number
-NUM = 12
+NUM = 16
 
 # Initialize the parsed and raw dataframes
 parsed_df, raw_df = init(PROV, FILE_NAMES, NUM)
