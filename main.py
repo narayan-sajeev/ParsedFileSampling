@@ -5,22 +5,10 @@ from datetime import datetime
 from utils import *
 
 # List of file names to be read in
-FILE_NAMES = ['2.食品抽检不合格-20200330.xls.pkl.gz', '2.食品抽检不合格-20200819.xls.pkl.gz',
-              '2.食品抽检不合格-20200923.xls.pkl.gz', '2.食品抽检不合格-20201021.xls.pkl.gz',
-              '2.食品抽检不合格-20201120.xls.pkl.gz', '2.食品抽检不合格-20210308.xls.pkl.gz',
-              '2.食品抽检不合格-20210521.xls.pkl.gz', '2.食品抽检不合格-20210721.xls.pkl.gz',
-              '2.食品抽检不合格-20211008.xls.pkl.gz', '2.食品抽检不合格-20211020.xls.pkl.gz',
-              '2.食品抽检不合格-20211229.xls.pkl.gz', '3.食品抽检合格-20191023.xls.pkl.gz',
-              '3.食品抽检合格-20191106.xls.pkl.gz', '3.食品抽检合格-20191127.xls.pkl.gz',
-              '3.食品抽检合格-20200226.xls.pkl.gz', '3.食品抽检合格-20200722.xls.pkl.gz',
-              '3.食品抽检合格-20210106_.xls.pkl.gz', '3.食品抽检合格-20210301_.xls.pkl.gz',
-              '3.食品抽检合格-20210714_.xls.pkl.gz', '3.食品抽检合格-20211020_.xls.pkl.gz',
-              '3.食品抽检合格-20211229.xls.pkl.gz', '3.食品抽检合格-20220105.xls.pkl.gz',
-              '4.保健食品抽检合格率-20210203.xlsx.pkl.gz', '附件2、食品抽检不合格-20190828.xls.pkl.gz',
-              '附件3、食品抽检合格-20190724.xls.pkl.gz']
+FILE_NAMES = []
 
 # Province name
-PROV = 'Zhejiang_Zhejiang_msb_20220402'
+PROV = ''
 
 
 def process_date(date):
