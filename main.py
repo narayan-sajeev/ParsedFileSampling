@@ -5,19 +5,28 @@ from datetime import datetime
 from utils import *
 
 # List of file names to be read in
-FILE_NAMES = ['023101.xlsx.pkl.gz', '023352.xls.pkl.gz', '023402.xls.pkl.gz', '023405.xls.pkl.gz', '023407.xls.pkl.gz',
-              '023409.xls.pkl.gz', '023411.xls.pkl.gz', '023413.xls.pkl.gz',
-              '023428监督抽检（国抽）合格_不合格产品信息统计表.xls.pkl.gz',
-              '1.西藏自治区２０２１年月饼抽检合格产品信息.xlsx.pkl.gz',
-              '2021年产品质量自治区专项监督抽查检验结果送达公告名单.xls.pkl.gz',
-              '2021年产品质量自治区监督抽查检验结果送达公告名单.xlsx.pkl.gz',
-              '监督抽检（国抽）合格_不合格产品信息统计表.xls.pkl.gz',
-              '监督抽检（省抽）合格_不合格产品信息统计表.xls.pkl.gz',
-              '监督抽检（省检）合格_不合格产品信息表.xls.pkl.gz', '送达公告附件.xlsx.pkl.gz',
-              '２.西藏自治区２０２１年月饼抽检不合格产品信息.xlsx.pkl.gz']
+FILE_NAMES = ['041524附件21_淀粉及淀粉制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '041951附件6_u2002食用油、油脂及其制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '0423333.___食用农产品监督抽检不合格产品信息.xlsx.pkl.gz',
+              '0427428.___乳制品监督抽检产品合格信息.xlsx.pkl.gz', '11._糖果制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '12.__肉制品监督抽检产品合格信息.xlsx.pkl.gz', '23.__炒货食品及坚果制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '3.__食用油、油脂及其制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '6.______粮食加工品监督抽检产品合格信息.xlsx.pkl.gz', '6.___粮食加工品监督抽检产品合格信息.xlsx.pkl.gz',
+              '7.__________食用农产品评价性抽检产品合格信息.xlsx.pkl.gz',
+              '附件10_u2002食用油、油脂及其制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '附件10_速冻食品监督抽检产品合格信息.xlsx.pkl.gz', '附件10_食用农产品监督抽检不合格产品信息.xlsx.pkl.gz',
+              '附件12_速冻食品监督抽检产品合格信息.xlsx.pkl.gz',
+              '附件12炒货食品及坚果制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '附件13_食用农产品监督抽检不合格产品信息.xlsx.pkl.gz',
+              '附件17_u2002淀粉及淀粉制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '附件18_乳制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '附件23_可可及焙烤咖啡产品监督抽检产品合格信息.xlsx.pkl.gz',
+              '附件24_食用农产品监督抽检产品合格信息.xlsx.pkl.gz', '附件2_食品农产品监督抽检产品合格信息.xlsx.pkl.gz',
+              '附件4_糖果制品监督抽检产品合格信息.xlsx.pkl.gz', '附件5_乳制品监督抽检产品合格信息.xlsx.pkl.gz',
+              '附件5_豆制品监督抽检产品合格信息.xlsx.pkl.gz']
 
 # Province name
-PROV = 'Tibet_Tibet_msb_20220317'
+PROV = 'Xinjiang_Xinjiang_msb_20220630'
 
 
 def process_date(date):
@@ -166,7 +175,7 @@ def drop_common(parsed_df, raw_df):
 
 
 # Set current file number
-NUM = 16
+NUM = 1
 
 # Initialize the parsed and raw dataframes
 parsed_df, raw_df = init(PROV, FILE_NAMES, NUM)
