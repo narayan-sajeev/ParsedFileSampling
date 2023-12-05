@@ -35,7 +35,7 @@ def process_date(date):
 
     date = date.split(' ')[-1]
 
-    rem = ['加', '工', '日', '期', '检', '疫', '购', '进', '生', '产', 'J', 'D', 'T', '号', '批', '样', '品']
+    rem = ['D', 'J', 'T', '产', '加', '号', '品', '工', '批', '日', '期', '样', '检', '生', '疫', '购', '进']
 
     # Remove unnecessary parts from the date column
     for r in rem:
