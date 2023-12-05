@@ -172,7 +172,7 @@ def drop_common(parsed_df, raw_df):
 
 
 # Set current file number
-NUM = 2
+NUM = 6
 
 # Initialize the parsed and raw dataframes
 parsed_df, raw_df = init(PROV, FILE_NAMES, NUM)
