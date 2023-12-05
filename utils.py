@@ -221,7 +221,7 @@ def drop_useless_columns(col_headers):
     for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
               '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
               '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地', '任务类别', '地市', '检验报告编号',
-              '抽查结果', '户外低帮休闲鞋', '采样时间']:
+              '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位']:
         try:
             while _ in col_headers:
                 col_headers.remove(_)
@@ -248,9 +248,9 @@ def debug(l1, l2):
 
 
 def read_excel():
-    """
+    '''
     Function to read the raw Excel file.
-    """
+    '''
     # Read the raw Excel file
     raw_df = pd.read_excel(get_path())
     # Get the index of the first occurrence
@@ -269,7 +269,7 @@ def read_excel():
 
 def init(PROV, FILE_NAMES, NUM):
     # Ignore all warnings
-    warnings.filterwarnings("ignore")
+    warnings.filterwarnings('ignore')
 
     # Set pandas option to display all columns
     pd.set_option('display.max_columns', None)
@@ -305,17 +305,17 @@ def init(PROV, FILE_NAMES, NUM):
 
 
 def remove_whitespace(df):
-    """
+    '''
     Function to remove whitespace from the column headers.
-    """
+    '''
     df.columns = df.columns.str.strip()
     return df
 
 
 def process_df(df):
-    """
+    '''
     Helper function to process a dataframe.
-    """
+    '''
     # Define the replacements
     replacements = {
         '，': '_',
@@ -343,9 +343,9 @@ def print_file_path():
 
 
 def print_head(df):
-    """
+    '''
     Function to print the first few rows of the dataframe.
-    """
+    '''
     # Print first few rows of the dataframe
     print()
     print(df.head())
@@ -353,9 +353,9 @@ def print_head(df):
 
 
 def print_tail(df):
-    """
+    '''
     Function to print the last few rows of the dataframe.
-    """
+    '''
 
     # Print last few rows of the dataframe
     if len(df) > 10:
@@ -368,9 +368,9 @@ def print_tail(df):
 
 
 def print_df(parsed_df, raw_df, file_path):
-    """
+    '''
     Function to print the dataframe.
-    """
+    '''
 
     # Drop columns that have all duplicate cells
     no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
@@ -395,9 +395,9 @@ def print_df(parsed_df, raw_df, file_path):
 
 
 def print_results(parsed_df, raw_df):
-    """
+    '''
     Function to print the results.
-    """
+    '''
 
     # Print the file path
     file_path = print_file_path()
