@@ -24,11 +24,10 @@ def get_all_fnames(PROV):
     files = []
     # Loop through each file in the directory
     for file in os.listdir(DIR):
-        # Check if the file is an Excel file and if it's not already in the list of files
-        is_xl = file.endswith(('.xlsx', '.xls'))
+        # Check if the file isn't already in the list of files
         pkl = file + '.pkl.gz'
         is_food = not any([i in file for i in ['业', '商', '饮', '酒']])
-        if is_xl and file not in current and pkl in os.listdir(DIR) and is_food:
+        if file not in current and pkl in os.listdir(DIR) and is_food:
             files.append(file)
 
     # Shuffle the list of files
