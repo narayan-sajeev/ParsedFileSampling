@@ -32,14 +32,19 @@ def process_date(date):
     # Convert the date column to a string and remove unnecessary parts
     date = str(date).split('：')[-1].strip()
     date = date.lstrip('/')
-    date = date.replace('加工日期', '').replace('检疫日期', '').replace('购进日期', '')
-    date = date.replace('日', '')
+
+    date = date.split(' ')[-1]
+
+    rem = ['加', '工', '日', '期', '检', '疫', '购', '进', '生', '产', 'J', 'D', 'T', '号', '批', '样', '品']
+
+    # Remove unnecessary parts from the date column
+    for r in rem:
+        date = date.replace(r, '')
+
+    date = date.replace('年', '-').replace('月', '-')
     date = re.sub(r'[ /.-]', '', date[:10])
-    date = date.replace('T', '').replace('J', '').replace('D', '')
     date = date.rstrip('-')
     date = date.split('～')[0]
-    date = date.replace('年', '-').replace('月', '-')
-    date = date.rstrip('-')
     date = date.split()[0]
 
     # If the date column has only one '-', return None
