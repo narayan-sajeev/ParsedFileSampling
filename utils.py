@@ -16,7 +16,10 @@ DIR = ''
 FILE_NAME = ''
 
 
-def get_all_fnames(DIR):
+def get_all_fnames(PROV):
+    global DIR
+    DIR = ROOT_DIR + PROV
+
     current = []
     files = []
     # Loop through each file in the directory
