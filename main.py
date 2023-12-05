@@ -74,12 +74,12 @@ def process_date(date):
 
 
 def drop_common(parsed_df, raw_df):
-    """
+    '''
     Function to drop common columns.
-    """
+    '''
     # Process the production date columns
     date_cols = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
-                 '生产日期（批号）', '生产日期/批号/购进日期', '生产/购进日期', '生产日期(批号)']
+                 '生产日期（批号）', '生产日期/批号/购进日期', '生产/购进日期', '生产日期(批号)', '生产日期\n（购进日期）']
 
     for col in date_cols:
         # Try to process the date column
@@ -172,7 +172,7 @@ def drop_common(parsed_df, raw_df):
 
 
 # Set current file number
-NUM = 1
+NUM = 2
 
 # Initialize the parsed and raw dataframes
 parsed_df, raw_df = init(PROV, FILE_NAMES, NUM)
