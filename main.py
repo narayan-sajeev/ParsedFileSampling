@@ -8,7 +8,7 @@ from utils import *
 FILE_NAMES = []
 
 # Province name
-PROV = ''
+PROV = 'Changde_Hunan_msb'
 
 
 def process_date(date):
@@ -64,7 +64,7 @@ def drop_common(parsed_df, raw_df):
     """
     # Process the production date columns
     date_cols = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
-                 '生产日期（批号）', '生产日期/批号/购进日期', '生产/购进日期']
+                 '生产日期（批号）', '生产日期/批号/购进日期', '生产/购进日期', '生产日期(批号)']
 
     for col in date_cols:
         # Try to process the date column
