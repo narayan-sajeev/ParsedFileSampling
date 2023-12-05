@@ -5,16 +5,26 @@ from datetime import datetime
 from utils import *
 
 # List of file names to be read in
-FILE_NAMES = []
+FILE_NAMES = ['02-0合格名单（畜牧养殖环节）.xls.pkl.gz', '2020食品安全监督抽检合格情况公示第10期.xlsx.pkl.gz',
+              '2020食品安全监督抽检合格情况公示第5期.xlsx.pkl.gz',
+              '常德市食品安全监督抽检合格产品名单（2020年第1期）.xlsx.pkl.gz',
+              '食品安全监督抽检合格产品名单（2019年第17期）.xlsx.pkl.gz',
+              '食品安全监督抽检合格产品名单（2019年第26期）.xlsx.pkl.gz',
+              '食品安全监督抽检合格产品名单（2019年第32期）.xlsx.pkl.gz',
+              '食品安全监督抽检合格产品名单（2019年第35期）.xlsx.pkl.gz',
+              '食品安全监督抽检合格产品名单（2019年第37期）.xlsx.pkl.gz',
+              '食品安全监督抽检合格产品名单（2019年第39期）.xlsx.pkl.gz',
+              '食品安全监督抽检合格产品名单（2020年第2期）.xlsx.pkl.gz',
+              '食品安全监督抽检合格产品名单（2020年第3期）.xlsx.pkl.gz']
 
 # Province name
 PROV = 'Changde_Hunan_msb'
 
 
 def process_date(date):
-    """
+    '''
     Function to process the date column.
-    """
+    '''
     # If the date column is empty, return None
     if date in ['/', '-', '不详'] or date is None:
         return None
@@ -89,7 +99,7 @@ def drop_common(parsed_df, raw_df):
 
     # Try to split the '不合格项目‖检验结果‖标准值' column into three columns
     try:
-        raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df["不合格项目‖检验结果‖标准值"].str.split('‖',
+        raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df['不合格项目‖检验结果‖标准值'].str.split('‖',
                                                                                                                expand=True)
     except:
         pass
