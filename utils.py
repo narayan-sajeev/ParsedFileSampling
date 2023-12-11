@@ -251,7 +251,10 @@ def read_excel():
     Function to read the raw Excel file.
     '''
     # Read the raw Excel file
-    raw_df = pd.read_excel(get_path())
+    try:
+        raw_df = pd.read_excel(get_path())
+    except:
+        return False
     # Get the index of the first occurrence
     try:
         idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
@@ -266,7 +269,7 @@ def read_excel():
     return raw_df
 
 
-def init(PROV, FILE_NAMES, NUM):
+def init(PROV, FILE_NAMES, NUM, col_headers=False):
     # Ignore all warnings
     warnings.filterwarnings('ignore')
 
@@ -287,18 +290,29 @@ def init(PROV, FILE_NAMES, NUM):
     # Read the dataframe from the pickle file
     parsed_df = get_df()
 
+    if not col_headers:
+        # Get the column headers
+        col_headers = raw_df.columns
+
     # Check substrings for unmatched columns
-    review_cols = substring(parsed_df, raw_df.columns)
+    review_cols = substring(parsed_df, col_headers)
 
     # Drop unnecessary columns from the dataframe
     parsed_df = drop_columns(parsed_df, review_cols)
-    raw_columns = drop_useless_columns(raw_df.columns)
-    # Select only the columns that are in the raw dataframe
-    raw_df = raw_df.loc[:, raw_columns]
 
     # Remove whitespace from the column headers
-    raw_df = remove_whitespace(raw_df)
     parsed_df = remove_whitespace(parsed_df)
+
+    # If the raw dataframe exists (if it's an Excel file)
+    if raw_df:
+        # Drop unnecessary columns from the dataframe
+        raw_columns = drop_useless_columns(raw_df.columns)
+
+        # Select only the columns that are in the raw dataframe
+        raw_df = raw_df.loc[:, raw_columns]
+
+        # Remove whitespace from the column headers
+        raw_df = remove_whitespace(raw_df)
 
     return parsed_df, raw_df
 
@@ -393,6 +407,29 @@ def print_df(parsed_df, raw_df, file_path):
     print_tail(raw_df)
 
 
+def print_parsed_df(parsed_df, file_path):
+    '''
+    Function to print the parsed dataframe.
+    '''
+
+    # Drop columns that have all duplicate cells
+    no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
+
+    # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
+    if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
+        return
+
+    # Set the dataframe to be the dataframe with no duplicate columns
+    parsed_df = no_dup_df
+
+    # Open the file
+    os.system(file_path)
+
+    # Print first & last few rows of the dataframe
+    print_head(parsed_df)
+    print_tail(parsed_df)
+
+
 def print_results(parsed_df, raw_df):
     '''
     Function to print the results.
@@ -403,3 +440,15 @@ def print_results(parsed_df, raw_df):
 
     # Print the dataframe
     print_df(parsed_df, raw_df, file_path)
+
+
+def print_parsed_results(parsed_df):
+    '''
+    Function to print the results.
+    '''
+
+    # Print the file path
+    file_path = print_file_path()
+
+    # Print the dataframe
+    print_parsed_df(parsed_df, file_path)
