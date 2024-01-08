@@ -5,15 +5,14 @@ from datetime import datetime
 from utils import *
 
 # List of file names to be read in
-FILE_NAMES = ['02-0合格名单（畜牧养殖环节）.xls.pkl.gz', '024406附件2_监督抽检合格食品信息.pdf.pkl.gz',
-              '2020食品安全监督抽检合格情况公示第10期.xlsx.pkl.gz', '2020食品安全监督抽检合格情况公示第5期.xlsx.pkl.gz',
-              'httpswwwchangdegovcncdzxgsggcontent_65516.html.pkl.gz', '公示合格名单第一期-表3.pdf.pkl.gz',
+FILE_NAMES = ['024406附件2_监督抽检合格食品信息.pdf.pkl.gz', '公示合格名单第一期-表3.pdf.pkl.gz',
               '公示合格名单第二期-表5.pdf.pkl.gz', '公示合格名单第二期-表6.pdf.pkl.gz', '公示合格名单第四期.pdf.pkl.gz',
-              '合格名单1（农业）.pdf.pkl.gz', '常德市食品安全监督抽检合格产品名单（2020年第1期）.xlsx.pkl.gz',
-              '附件1_月饼专项监督抽检信息.pdf.pkl.gz', '附件1_食用农产品监督抽检合格信息.pdf.pkl.gz',
-              '附件2_2017年6月省抽生产环节合格产品名单.pdf.pkl.gz', '附件2_抽检合格食品信息（201832）.pdf.pkl.gz',
-              '附件4_2017年5月消费环节抽检合格产品名单.pdf.pkl.gz',
-              '附件6_2017年8月市抽流通环节合格产品名单.pdf.pkl.gz',
+              '合格名单1（农业）.pdf.pkl.gz', '附件1_月饼专项监督抽检信息.pdf.pkl.gz',
+              '附件1_食用农产品监督抽检合格信息.pdf.pkl.gz', '附件2_2017年6月省抽生产环节合格产品名单.pdf.pkl.gz',
+              '附件2_抽检合格食品信息（201832）.pdf.pkl.gz', '附件4_2017年5月消费环节抽检合格产品名单.pdf.pkl.gz',
+              '附件6_2017年8月市抽流通环节合格产品名单.pdf.pkl.gz', '02-0合格名单（畜牧养殖环节）.xls.pkl.gz',
+              '2020食品安全监督抽检合格情况公示第10期.xlsx.pkl.gz', '2020食品安全监督抽检合格情况公示第5期.xlsx.pkl.gz',
+              '常德市食品安全监督抽检合格产品名单（2020年第1期）.xlsx.pkl.gz',
               '食品安全监督抽检合格产品名单（2019年第17期）.xlsx.pkl.gz',
               '食品安全监督抽检合格产品名单（2019年第26期）.xlsx.pkl.gz',
               '食品安全监督抽检合格产品名单（2019年第32期）.xlsx.pkl.gz',
@@ -178,7 +177,7 @@ def drop_common(parsed_df, raw_df):
 
 
 # Set current file number
-NUM = 2
+NUM = 1
 
 # Set column headers
 col_headers = ['序号', '样品名称', '标称生产企业名称', '标称生产企业地址', '被抽样单位名称', '被抽样单位地址',
@@ -189,7 +188,7 @@ col_headers = ['序号', '样品名称', '标称生产企业名称', '标称生�
 parsed_df, raw_df = init(PROV, FILE_NAMES, NUM, col_headers=col_headers)
 
 # If raw_df exists
-if raw_df:
+if isinstance(raw_df, pd.DataFrame):
     # Drop common columns from the dataframe
     parsed_df, raw_df = drop_common(parsed_df, raw_df)
 
@@ -198,4 +197,4 @@ if raw_df:
 
 else:
     # Print the results
-    print_parsed_results(parsed_df)
+    print_results(parsed_df, None, False)

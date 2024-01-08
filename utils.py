@@ -15,6 +15,8 @@ DIR = ''
 # Define the file name
 FILE_NAME = ''
 
+FILES_PER_PROV = 25
+
 
 def get_all_fnames(PROV):
     global DIR
@@ -26,15 +28,33 @@ def get_all_fnames(PROV):
     for file in os.listdir(DIR):
         # Check if the file isn't already in the list of files
         pkl = file + '.pkl.gz'
-        is_food = not any([i in file for i in ['业', '商', '饮', '酒']])
-        if file not in current and pkl in os.listdir(DIR) and is_food:
+        # Check if the file is PDF or Excel
+        is_xl_pdf = any([i in file for i in ['xls', 'xlsx', 'pdf']])
+        # Check if the file is a food file
+        is_food = not any([i in file for i in ['商', '饮', '酒']])
+        if file not in current and pkl in os.listdir(DIR) and is_food and is_xl_pdf:
             files.append(file)
 
     # Shuffle the list of files
     random.shuffle(files)
 
+    # Retrieve the list of PDF files
+    pdf = sorted([file for file in files if 'pdf' in file])
+
+    # Retrieve the list of Excel files
+    xl = sorted([file for file in files if 'xls' in file])
+
+    # Calculate the proportional number of PDF files
+    num_pdf = int(FILES_PER_PROV * len(pdf) / len(files))
+
+    # Calculate the proportional number of Excel files
+    num_xl = FILES_PER_PROV - num_pdf
+
+    # Combine the lists of PDF and Excel files
+    files = pdf[:num_pdf] + xl[:num_xl]
+
     # Print the first 25 files in the list
-    print('\n'.join(sorted(files[:25])))
+    print('\n'.join(files))
 
     quit()
 
@@ -304,7 +324,7 @@ def init(PROV, FILE_NAMES, NUM, col_headers=False):
     parsed_df = remove_whitespace(parsed_df)
 
     # If the raw dataframe exists (if it's an Excel file)
-    if raw_df:
+    if isinstance(raw_df, pd.DataFrame):
         # Drop unnecessary columns from the dataframe
         raw_columns = drop_useless_columns(raw_df.columns)
 
@@ -380,7 +400,7 @@ def print_tail(df):
     hr()
 
 
-def print_df(parsed_df, raw_df, file_path):
+def print_df(parsed_df, file_path):
     '''
     Function to print the dataframe.
     '''
@@ -390,7 +410,7 @@ def print_df(parsed_df, raw_df, file_path):
 
     # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
     if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
-        return
+        quit()
 
     # Set the dataframe to be the dataframe with no duplicate columns
     parsed_df = no_dup_df
@@ -398,39 +418,10 @@ def print_df(parsed_df, raw_df, file_path):
     # Open the file
     os.system(file_path)
 
-    # Print first few rows of the dataframes
-    print_head(parsed_df)
-    print_head(raw_df)
-
-    # Print last few rows of the dataframes
-    print_tail(parsed_df)
-    print_tail(raw_df)
+    return parsed_df
 
 
-def print_parsed_df(parsed_df, file_path):
-    '''
-    Function to print the parsed dataframe.
-    '''
-
-    # Drop columns that have all duplicate cells
-    no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
-
-    # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
-    if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
-        return
-
-    # Set the dataframe to be the dataframe with no duplicate columns
-    parsed_df = no_dup_df
-
-    # Open the file
-    os.system(file_path)
-
-    # Print first & last few rows of the dataframe
-    print_head(parsed_df)
-    print_tail(parsed_df)
-
-
-def print_results(parsed_df, raw_df):
+def print_results(parsed_df, raw_df, raw=True):
     '''
     Function to print the results.
     '''
@@ -439,16 +430,18 @@ def print_results(parsed_df, raw_df):
     file_path = print_file_path()
 
     # Print the dataframe
-    print_df(parsed_df, raw_df, file_path)
+    parsed_df = print_df(parsed_df, file_path)
 
+    if raw:
+        # Print first few rows of the dataframes
+        print_head(parsed_df)
+        print_head(raw_df)
 
-def print_parsed_results(parsed_df):
-    '''
-    Function to print the results.
-    '''
+        # Print last few rows of the dataframes
+        print_tail(parsed_df)
+        print_tail(raw_df)
 
-    # Print the file path
-    file_path = print_file_path()
-
-    # Print the dataframe
-    print_parsed_df(parsed_df, file_path)
+    else:
+        # Print first & last few rows of the dataframe
+        print_head(parsed_df)
+        print_tail(parsed_df)
