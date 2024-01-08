@@ -448,7 +448,7 @@ def count_na(df):
 # Print percentage of rows containing '%' or '/' for each column
 def count_percent_slash(df):
     print('% and / percentage:')
-    pct = (df.apply(lambda x: x.str.contains('%|/', regex=True)).sum() / len(df) * 100).sort_values(
+    pct = (df.apply(lambda x: x.str.match('%|/')).sum() / len(df) * 100).sort_values(
         ascending=False).astype(int)
     for col, p in pct.items():
         print('%s: %s' % (col, p))
