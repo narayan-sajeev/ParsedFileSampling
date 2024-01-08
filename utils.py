@@ -240,7 +240,8 @@ def drop_useless_columns(col_headers):
     for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
               '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
               '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地', '任务类别', '地市', '检验报告编号',
-              '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位', '样品数量', '样品编号', '检验标准']:
+              '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位', '样品数量', '样品编号', '检验标准', '检验判定依据',
+              '注册商标']:
         try:
             while _ in col_headers:
                 col_headers.remove(_)
@@ -391,15 +392,17 @@ def print_tail(df, ten=False):
     Function to print the last few rows of the dataframe.
     '''
 
-    # Print last few rows of the dataframe
+    # Set the number of rows to be printed
     num = 10 if ten else 5
-    if len(df) > 10:
+
+    # Print last few rows of the dataframe
+    if len(df) > num * 2:
         print(df.tail(num))
+        hr()
 
-    elif len(df) > 5:
-        print(df.tail(len(df) - 5))
-
-    hr()
+    elif len(df) > num:
+        print(df.tail(len(df) - num))
+        hr()
 
 
 def print_df(parsed_df, file_path):
@@ -429,6 +432,7 @@ def is_df(df):
     '''
     return isinstance(df, pd.DataFrame)
 
+
 # Print NaN percentage for each column
 def count_na(df):
     '''
@@ -440,6 +444,7 @@ def count_na(df):
         print('%s: %s' % (col, p))
     hr()
 
+
 # Print percentage of rows containing '%' or '/' for each column
 def count_percent_slash(df):
     print('% and / percentage:')
@@ -448,6 +453,7 @@ def count_percent_slash(df):
     for col, p in pct.items():
         print('%s: %s' % (col, p))
     hr()
+
 
 def print_results(parsed_df, raw_df):
     '''
