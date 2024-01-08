@@ -375,24 +375,26 @@ def print_file_path():
     return path
 
 
-def print_head(df):
+def print_head(df, ten=False):
     '''
     Function to print the first few rows of the dataframe.
     '''
+    num = 10 if ten else 5
     # Print first few rows of the dataframe
     print()
-    print(df.head())
+    print(df.head(num))
     hr()
 
 
-def print_tail(df):
+def print_tail(df, ten=False):
     '''
     Function to print the last few rows of the dataframe.
     '''
 
     # Print last few rows of the dataframe
+    num = 10 if ten else 5
     if len(df) > 10:
-        print(df.tail())
+        print(df.tail(num))
 
     elif len(df) > 5:
         print(df.tail(len(df) - 5))
@@ -427,6 +429,25 @@ def is_df(df):
     '''
     return isinstance(df, pd.DataFrame)
 
+# Print NaN percentage for each column
+def count_na(df):
+    '''
+    Function to print the NaN percentage for each column.
+    '''
+    print('NaN percentage:')
+    pct = (df.isnull().sum() / len(df) * 100).sort_values(ascending=False).astype(int)
+    for col, p in pct.items():
+        print('%s: %s' % (col, p))
+    hr()
+
+# Print percentage of rows containing '%' or '/' for each column
+def count_percent_slash(df):
+    print('% and / percentage:')
+    pct = (df.apply(lambda x: x.str.contains('%|/', regex=True)).sum() / len(df) * 100).sort_values(
+        ascending=False).astype(int)
+    for col, p in pct.items():
+        print('%s: %s' % (col, p))
+    hr()
 
 def print_results(parsed_df, raw_df):
     '''
@@ -452,5 +473,8 @@ def print_results(parsed_df, raw_df):
     # If the raw dataframe doesn't exist (if it's a PDF file)
     else:
         # Print first & last few rows of the dataframe
-        print_head(parsed_df)
-        print_tail(parsed_df)
+        print('Parsed:', len(parsed_df))
+        print_head(parsed_df, True)
+        print_tail(parsed_df, True)
+        count_na(parsed_df)
+        count_percent_slash(parsed_df)
