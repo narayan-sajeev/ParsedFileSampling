@@ -177,7 +177,7 @@ def drop_common(parsed_df, raw_df):
 
 
 # Set current file number
-NUM = 1
+NUM = 20
 
 # Set column headers
 col_headers = ['序号', '样品名称', '标称生产企业名称', '标称生产企业地址', '被抽样单位名称', '被抽样单位地址',
@@ -188,7 +188,7 @@ col_headers = ['序号', '样品名称', '标称生产企业名称', '标称生�
 parsed_df, raw_df = init(PROV, FILE_NAMES, NUM, col_headers=col_headers)
 
 # If raw_df exists
-if isinstance(raw_df, pd.DataFrame):
+if is_df(raw_df):
     # Drop common columns from the dataframe
     parsed_df, raw_df = drop_common(parsed_df, raw_df)
 
@@ -197,4 +197,4 @@ if isinstance(raw_df, pd.DataFrame):
 
 else:
     # Print the results
-    print_results(parsed_df, None, False)
+    print_results(parsed_df, None)

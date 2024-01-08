@@ -324,7 +324,7 @@ def init(PROV, FILE_NAMES, NUM, col_headers=False):
     parsed_df = remove_whitespace(parsed_df)
 
     # If the raw dataframe exists (if it's an Excel file)
-    if isinstance(raw_df, pd.DataFrame):
+    if is_df(raw_df):
         # Drop unnecessary columns from the dataframe
         raw_columns = drop_useless_columns(raw_df.columns)
 
@@ -421,7 +421,14 @@ def print_df(parsed_df, file_path):
     return parsed_df
 
 
-def print_results(parsed_df, raw_df, raw=True):
+def is_df(df):
+    '''
+    Function to check if the input is a dataframe.
+    '''
+    return isinstance(df, pd.DataFrame)
+
+
+def print_results(parsed_df, raw_df):
     '''
     Function to print the results.
     '''
@@ -432,7 +439,8 @@ def print_results(parsed_df, raw_df, raw=True):
     # Print the dataframe
     parsed_df = print_df(parsed_df, file_path)
 
-    if raw:
+    # If the raw dataframe exists (if it's an Excel file)
+    if is_df(raw_df):
         # Print first few rows of the dataframes
         print_head(parsed_df)
         print_head(raw_df)
@@ -441,6 +449,7 @@ def print_results(parsed_df, raw_df, raw=True):
         print_tail(parsed_df)
         print_tail(raw_df)
 
+    # If the raw dataframe doesn't exist (if it's a PDF file)
     else:
         # Print first & last few rows of the dataframe
         print_head(parsed_df)
