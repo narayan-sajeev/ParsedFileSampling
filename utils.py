@@ -38,20 +38,17 @@ def get_all_fnames(PROV):
     # Shuffle the list of files
     random.shuffle(files)
 
+    # Retrieve first 25 files
+    files = files[:FILES_PER_PROV]
+
     # Retrieve the list of PDF files
     pdf = sorted([file for file in files if 'pdf' in file])
 
     # Retrieve the list of Excel files
     xl = sorted([file for file in files if 'xls' in file])
 
-    # Calculate the proportional number of PDF files
-    num_pdf = int(FILES_PER_PROV * len(pdf) / len(files))
-
-    # Calculate the proportional number of Excel files
-    num_xl = FILES_PER_PROV - num_pdf
-
     # Combine the lists of PDF and Excel files
-    files = pdf[:num_pdf] + xl[:num_xl]
+    files = pdf + xl
 
     # Print the first 25 files in the list
     print('\n'.join(files))
@@ -482,3 +479,5 @@ def print_results(parsed_df, raw_df):
         print('Parsed:', len(parsed_df))
         print_head(parsed_df, True)
         print_tail(parsed_df, True)
+        count_na(parsed_df)
+        count_percent_slash(parsed_df)
