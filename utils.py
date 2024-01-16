@@ -32,7 +32,7 @@ def get_files(PROV):
         is_xl_pdf = any([i in file for i in ['xls', 'xlsx', 'pdf']])
         # Check if the file is a food file
         is_food = not any([i in file for i in ['商', '饮', '酒']])
-        if file not in current and pkl in os.listdir(DIR) and is_food and is_xl_pdf:
+        if file not in current and pkl in os.listdir(DIR) and is_food and is_xl_pdf and 'https' not in file:
             files.append(file)
 
     # Shuffle the list of files
