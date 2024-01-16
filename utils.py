@@ -18,7 +18,7 @@ FILE_NAME = ''
 FILES_PER_PROV = 25
 
 
-def get_all_fnames(PROV):
+def get_files(PROV):
     global DIR
     DIR = ROOT_DIR + PROV
 
