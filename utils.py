@@ -430,28 +430,6 @@ def is_df(df):
     return isinstance(df, pd.DataFrame)
 
 
-# Print NaN percentage for each column
-def count_na(df):
-    '''
-    Function to print the NaN percentage for each column.
-    '''
-    print('NaN percentage:')
-    pct = (df.isnull().sum() / len(df) * 100).sort_values(ascending=False).astype(int)
-    for col, p in pct.items():
-        print('%s: %s' % (col, p))
-    hr()
-
-
-# Print percentage of rows containing '%' or '/' for each column
-def count_percent_slash(df):
-    print('% and / percentage:')
-    pct = (df.apply(lambda x: x.str.match('%|/')).sum() / len(df) * 100).sort_values(
-        ascending=False).astype(int)
-    for col, p in pct.items():
-        print('%s: %s' % (col, p))
-    hr()
-
-
 def print_results(parsed_df, raw_df):
     '''
     Function to print the results.
@@ -479,5 +457,3 @@ def print_results(parsed_df, raw_df):
         print('Parsed:', len(parsed_df))
         print_head(parsed_df, True)
         print_tail(parsed_df, True)
-        count_na(parsed_df)
-        count_percent_slash(parsed_df)
