@@ -1,10 +1,11 @@
 # Function to get all file names from a directory
 import json
 import os
-import random
 import warnings
+from random import shuffle
 
 import pandas as pd
+from tqdm import tqdm
 
 # Define the root directory where the parsed files are located
 ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
@@ -15,7 +16,7 @@ DIR = ''
 # Define the file name
 FILE_NAME = ''
 
-FILES_PER_PROV = 25
+FILES_PER_PROV = 10
 
 
 def get_files(PROV):
@@ -24,31 +25,26 @@ def get_files(PROV):
 
     current = []
     files = []
+    shuffled = os.listdir(DIR)
+    shuffle(shuffled)
     # Loop through each file in the directory
-    for file in os.listdir(DIR):
+    for file in tqdm(shuffled):
         # Check if the file isn't already in the list of files
         pkl = file + '.pkl.gz'
-        # Check if the file is PDF or Excel
-        is_xl_pdf = any([i in file for i in ['xls', 'xlsx', 'pdf']])
+        # Check if the file is valid
+        # is_valid = any([i in file for i in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf']])
+        is_valid = any([i in file for i in ['doc', 'docx', 'html', 'pdf']])
         # Check if the file is a food file
         is_food = not any([i in file for i in ['商', '饮', '酒']])
-        if file not in current and pkl in os.listdir(DIR) and is_food and is_xl_pdf and 'https' not in file:
+        if file not in current and pkl in os.listdir(DIR) and is_food and is_valid and 'https' not in file:
             files.append(file)
 
-    # Shuffle the list of files
-    random.shuffle(files)
+        # Quit if the number of files is greater than or equal to the number of files per province
+        if len(files) >= FILES_PER_PROV:
+            break
 
-    # Retrieve first 25 files
-    files = files[:FILES_PER_PROV]
-
-    # Retrieve the list of PDF files
-    pdf = sorted([file for file in files if 'pdf' in file])
-
-    # Retrieve the list of Excel files
-    xl = sorted([file for file in files if 'xls' in file])
-
-    # Combine the lists of PDF and Excel files
-    files = pdf + xl
+    # Retrieve first few files
+    files = sorted(files[:FILES_PER_PROV])
 
     # Print the first 25 files in the list
     print('\n'.join(files))
@@ -238,7 +234,9 @@ def drop_useless_columns(col_headers):
               '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
               '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地', '任务类别', '地市', '检验报告编号',
               '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位', '样品数量', '样品编号', '检验标准', '检验判定依据',
-              '注册商标', '检验报告单编号', '型号', '等级']:
+              '注册商标', '检验报告单编号', '型号', '等级', '不合格样品数量/批次', '合格样品数量/批次', '样品合格率',
+              '样品抽检数量/批次', '不合格样品数量（批次）', '监督抽检样品总量（批次）', '住所', '有效期至', '检验方式',
+              '注销原因', '证书编号', '公告文号']:
         try:
             while _ in col_headers:
                 col_headers.remove(_)
@@ -402,9 +400,9 @@ def print_tail(df, ten=False):
         hr()
 
 
-def print_df(parsed_df, file_path):
+def edit_df(parsed_df, file_path):
     '''
-    Function to print the dataframe.
+    Function to edit the dataframe.
     '''
 
     # Drop columns that have all duplicate cells
@@ -438,8 +436,8 @@ def print_results(parsed_df, raw_df):
     # Print the file path
     file_path = print_file_path()
 
-    # Print the dataframe
-    parsed_df = print_df(parsed_df, file_path)
+    # Edit the dataframe
+    parsed_df = edit_df(parsed_df, file_path)
 
     # If the raw dataframe exists (if it's an Excel file)
     if is_df(raw_df):
