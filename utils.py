@@ -246,7 +246,7 @@ def drop_useless_columns(col_headers):
 
 # Function to print a horizontal line
 def hr():
-    print('*' * 300)
+    print('*' * 100)
 
 
 # Function to get the file path
