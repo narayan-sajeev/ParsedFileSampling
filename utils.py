@@ -507,7 +507,7 @@ def process_df(df):
 
 
 def print_file_path():
-    path = 'open %s' % get_path()
+    path = 'open \'%s\'' % get_path()
     fname = path.split('/')[-1]
     print(fname)
     return path
