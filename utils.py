@@ -254,12 +254,6 @@ def get_path():
     return '%s/%s' % (DIR, FILE_NAME.split('.pkl')[0])
 
 
-def debug(l1, l2):
-    for i, _ in enumerate(l1):
-        print(_, l2[i], _ == l2[i])
-        print(type(_), type(l2[i]))
-
-
 def read_excel():
     '''
     Function to read the raw Excel file.
