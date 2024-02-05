@@ -38,7 +38,7 @@ def get_files(PROV):
         is_valid = any([i in file for i in ['doc', 'docx', 'html', 'pdf']])
         # Check if the file is a food file
         is_food = not any([i in file for i in ['商', '饮', '酒']])
-        if file not in current and pkl in os.listdir(DIR) and is_food and is_valid and 'https' not in file:
+        if file not in current and pkl in os.listdir(DIR) and is_food and is_valid and 'http' not in file:
             files.append(file)
 
         # Quit if the number of files is greater than or equal to the number of files per province
