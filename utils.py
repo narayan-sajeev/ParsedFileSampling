@@ -234,7 +234,8 @@ def drop_useless_columns(col_headers):
               '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位', '样品数量', '样品编号', '检验标准', '检验判定依据',
               '注册商标', '检验报告单编号', '型号', '等级', '不合格样品数量/批次', '合格样品数量/批次', '样品合格率',
               '样品抽检数量/批次', '不合格样品数量（批次）', '监督抽检样品总量（批次）', '住所', '有效期至', '检验方式',
-              '注销原因', '证书编号', '公告文号', '食品亚类（二级）', '食品品种（三级）', '食品细类（四级）']:
+              '注销原因', '证书编号', '公告文号', '食品亚类（二级）', '食品品种（三级）', '食品细类（四级）',
+              '不合格样品（批次）', '合格样品（批次）', '监督抽检样品（批次）']:
         try:
             while _ in col_headers:
                 col_headers.remove(_)
@@ -277,7 +278,7 @@ def read_excel():
     return raw_df
 
 
-def init(PROV, FILE_NAMES, NUM, col_headers=False):
+def init(PROV, FILE_NAMES, NUM, col_headers):
     # Ignore all warnings
     warnings.filterwarnings('ignore')
 
@@ -297,10 +298,6 @@ def init(PROV, FILE_NAMES, NUM, col_headers=False):
 
     # Read the dataframe from the pickle file
     parsed_df = get_df()
-
-    if not col_headers:
-        # Get the column headers
-        col_headers = raw_df.columns
 
     # Check substrings for unmatched columns
     review_cols = substring(parsed_df, col_headers)

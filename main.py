@@ -13,7 +13,7 @@ NUM = 1
 col_headers = []
 
 # Initialize the parsed and raw dataframes
-parsed_df, raw_df = init(PROV, FILE_NAMES, NUM, col_headers=col_headers)
+parsed_df, raw_df = init(PROV, FILE_NAMES, NUM, col_headers)
 
 # If raw_df exists
 if is_df(raw_df):
