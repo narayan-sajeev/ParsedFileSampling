@@ -544,15 +544,15 @@ def edit_df(parsed_df, file_path):
     Function to edit the dataframe.
     '''
 
-    # Drop columns that have all duplicate cells
-    no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
-
-    # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
-    if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
-        quit()
-
-    # Set the dataframe to be the dataframe with no duplicate columns
-    parsed_df = no_dup_df
+    # # Drop columns that have all duplicate cells
+    # no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
+    #
+    # # If the dataframe has no columns or only has the inspection results column or has duplicate values, quit
+    # if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
+    #     quit()
+    #
+    # # Set the dataframe to be the dataframe with no duplicate columns
+    # parsed_df = no_dup_df
 
     # Open the file
     os.system(file_path)
