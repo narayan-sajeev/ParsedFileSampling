@@ -291,6 +291,9 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
 
     NUM -= 1
 
+    # Add .pkl.gz to the file name
+    FILE_NAMES = [f + '.pkl.gz' for f in FILE_NAMES]
+
     global FILE_NAME
     FILE_NAME = FILE_NAMES[NUM]
 
