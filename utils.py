@@ -1,9 +1,8 @@
 import json
 import os
 import re
-import warnings
 from datetime import datetime
-from random import choices
+from random import sample
 
 import pandas as pd
 
@@ -28,7 +27,7 @@ def get_files(PROV):
     files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒'])]
 
     # Randomly select from valid files
-    print('\n'.join(sorted(choices(files, k=FILES_PER_PROV))))
+    print('\n'.join(sorted(sample(files, FILES_PER_PROV))))
 
     quit()
 
@@ -236,9 +235,6 @@ def read_excel():
 
 
 def init(PROV, FILE_NAMES, NUM, col_headers):
-    # Ignore all warnings
-    warnings.filterwarnings('ignore')
-
     # Set pandas option to display all columns
     pd.set_option('display.max_columns', None)
 
