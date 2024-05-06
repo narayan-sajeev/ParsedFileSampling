@@ -7,7 +7,6 @@ from datetime import datetime
 from random import shuffle
 
 import pandas as pd
-from tqdm import tqdm
 
 # Define the root directory where the parsed files are located
 ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
@@ -25,25 +24,13 @@ def get_files(PROV):
     global DIR
     DIR = ROOT_DIR + PROV
 
-    current = []
-    files = []
     shuffled = os.listdir(DIR)
     shuffle(shuffled)
-    # Loop through each file in the directory
-    for file in tqdm(shuffled):
-        # Check if the file isn't already in the list of files
-        pkl = file + '.pkl.gz'
-        # Check if the file is valid
-        # is_valid = any([i in file for i in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf']])
-        is_valid = any([i in file for i in ['doc', 'docx', 'html', 'pdf']])
-        # Check if the file is a food file
-        is_food = not any([i in file for i in ['商', '饮', '酒']])
-        if file not in current and pkl in os.listdir(DIR) and is_food and is_valid and 'http' not in file:
-            files.append(file)
-
-        # Quit if the number of files is greater than or equal to the number of files per province
-        if len(files) >= FILES_PER_PROV:
-            break
+    pkl_files = [f for f in shuffled if
+                 f.count('http') == 0 and shuffled.count(f) == 1 and shuffled.count(f + '.pkl.gz') == 1]
+    # valid_files = [f for f in pkl_files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
+    valid_files = [f for f in pkl_files if any(e in f for e in ['doc', 'docx', 'html', 'pdf'])]
+    files = [f for f in valid_files if not any(c in f for c in ['商', '饮', '酒'])]
 
     # Retrieve first few files
     files = sorted(files[:FILES_PER_PROV])
