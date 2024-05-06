@@ -43,39 +43,32 @@ def get_df():
     return pd.read_pickle('%s/%s' % (DIR, FILE_NAME))
 
 
-# Function to get known column classifiers from a JSON file
 def get_known_cols():
-    # checking column classifier
     known_cols_fn = '/Users/narayansajeev/Desktop/MIT/known_columns.json'
     with open(known_cols_fn) as f:
         return json.load(f)
 
 
-# Function to clean column headers by removing newline, carriage return, non-breaking space and space characters
-def clean(col_headers):
-    return [n.replace('\n', '').replace('\r', '').replace('\xa0', '').replace(' ', '') for n in col_headers]
+def clean_cols(headers):
+    return [n.replace('\n', '').replace('\r', '').replace('\xa0', '').replace(' ', '').strip('\u2003') for n in headers]
 
 
-# Function to check substrings in column headers
-def substr_check(substr_sets, k):
+def check_substring(substr_sets, k):
     substr_dict = {}
     for s in substr_sets:
         substr_dict[s] = any([i in k for i in substr_sets[s]])
     return substr_dict
 
 
-# Function to check substrings for unmatched columns
 def substring(df, col_headers):
+    # Get the known column headers
     known_cols = get_known_cols()
 
     # Clean up the column headers
-    col_headers = clean(col_headers)
-
-    # Remove unicode characters
-    col_headers = [s.strip('\u2003') for s in col_headers]
+    col_headers = clean_cols(col_headers)
 
     # Drop unnecessary columns from column headers
-    col_headers = drop_useless_columns(col_headers)
+    col_headers = drop_useless_cols(col_headers)
 
     # dictionary of substrings to check for in column headers
     substr_sets = {
@@ -108,9 +101,8 @@ def substring(df, col_headers):
         '所检项目符合标准要求。',
         '所检项目符合国家标准或地方标准']
 
-    # list to store unmatched column headers
     unmatched_cols = []
-    # review these cols
+
     review_cols = []
 
     # check for unmatched column headers
@@ -120,7 +112,7 @@ def substring(df, col_headers):
 
     # check substrings for unmatched columns
     for k in unmatched_cols:
-        substr_dict = substr_check(substr_sets, k)
+        substr_dict = check_substring(substr_sets, k)
         if '日期' in k and '生产' in k:
             continue
         if '日期' in k and substr_dict['announcement_date']:
@@ -186,7 +178,6 @@ def drop_columns(df, col_headers):
     # Drop columns that have all NaN values
     drop_df = df.dropna(axis=1, how='all')
 
-    # List to store dropped column headers
     dropped = []
 
     # Check for dropped column headers
@@ -194,7 +185,6 @@ def drop_columns(df, col_headers):
         if col not in drop_df.columns:
             dropped.append(col)
 
-    # Sort column headers
     col_headers = sorted(col_headers)
 
     # Print unmatched and dropped column headers
@@ -205,44 +195,32 @@ def drop_columns(df, col_headers):
     return drop_df
 
 
-# Drop unnecessary columns from column headers
-def drop_useless_columns(col_headers):
-    # Convert to list
+def drop_useless_cols(col_headers):
     col_headers = list(col_headers)
 
-    # Remove unnecessary column headers
-    for _ in ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市', '被抽样单位所在盟市',
-              '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号', '地址', '序', '抽查领域',
-              '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地', '任务类别', '地市', '检验报告编号',
-              '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位', '样品数量', '样品编号', '检验标准', '检验判定依据',
-              '注册商标', '检验报告单编号', '型号', '等级', '不合格样品数量/批次', '合格样品数量/批次', '样品合格率',
-              '样品抽检数量/批次', '不合格样品数量（批次）', '监督抽检样品总量（批次）', '住所', '有效期至', '检验方式',
-              '注销原因', '证书编号', '公告文号', '食品亚类（二级）', '食品品种（三级）', '食品细类（四级）',
-              '不合格样品（批次）', '合格样品（批次）', '监督抽检样品（批次）', '备案人', '备案人地址', '备案登记号',
-              '监督抽检样品总量/批次', '省级匹配任务增加检验项目', '风险等级']:
-        try:
-            while _ in col_headers:
-                col_headers.remove(_)
-        except:
-            pass
+    remove_cols = ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市',
+                   '被抽样单位所在盟市', '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号',
+                   '地址', '序', '抽查领域', '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地',
+                   '任务类别', '地市', '检验报告编号', '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位', '样品数量',
+                   '样品编号', '检验标准', '检验判定依据', '注册商标', '检验报告单编号', '型号', '等级',
+                   '不合格样品数量/批次', '合格样品数量/批次', '样品合格率', '样品抽检数量/批次',
+                   '不合格样品数量（批次）', '监督抽检样品总量（批次）', '住所', '有效期至', '检验方式', '注销原因',
+                   '证书编号', '公告文号', '食品亚类（二级）', '食品品种（三级）', '食品细类（四级）', '不合格样品（批次）',
+                   '合格样品（批次）', '监督抽检样品（批次）', '备案人', '备案人地址', '备案登记号',
+                   '监督抽检样品总量/批次', '省级匹配任务增加检验项目', '风险等级']
 
-    return col_headers
+    return [header for header in col_headers if header not in remove_cols]
 
 
-# Function to print a horizontal line
 def hr():
     print('*' * 100)
 
 
-# Function to get the file path
 def get_path():
     return '%s/%s' % (DIR, FILE_NAME.split('.pkl')[0])
 
 
 def read_excel():
-    '''
-    Function to read the raw Excel file.
-    '''
     # Read the raw Excel file
     try:
         raw_df = pd.read_excel(get_path())
@@ -298,7 +276,7 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
     # If the raw dataframe exists (if it's an Excel file)
     if is_df(raw_df):
         # Drop unnecessary columns from the dataframe
-        raw_columns = drop_useless_columns(raw_df.columns)
+        raw_columns = drop_useless_cols(raw_df.columns)
 
         # Select only the columns that are in the raw dataframe
         raw_df = raw_df.loc[:, raw_columns]
@@ -309,10 +287,7 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
     return parsed_df, raw_df
 
 
-def process_date(date):
-    '''
-    Function to process the date column.
-    '''
+def process_date_col(date):
     # If the date column is empty, return None
     if date in ['/', '-', '不详'] or date is None:
         return None
@@ -361,10 +336,7 @@ def process_date(date):
     return date
 
 
-def drop_common(parsed_df, raw_df):
-    '''
-    Function to drop common columns.
-    '''
+def drop_common_cols(parsed_df, raw_df):
     # Process the production date columns
     date_cols = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
                  '生产日期（批号）', '生产日期/批号/购进日期', '生产/购进日期', '生产日期(批号)', '生产日期\n（购进日期）']
@@ -373,7 +345,7 @@ def drop_common(parsed_df, raw_df):
         # Try to process the date column
         try:
             # Apply the process_date function to the date column
-            raw_df[col] = raw_df[col].apply(process_date)
+            raw_df[col] = raw_df[col].apply(process_date_col)
         except:
             pass
 
@@ -381,7 +353,7 @@ def drop_common(parsed_df, raw_df):
 
     if prod_date in parsed_df.columns:
         # Process the production date columns
-        parsed_df[prod_date] = parsed_df[prod_date].apply(process_date)
+        parsed_df[prod_date] = parsed_df[prod_date].apply(process_date_col)
 
     # Process the dataframes
     parsed_df = process_df(parsed_df)
@@ -413,8 +385,7 @@ def drop_common(parsed_df, raw_df):
     if unique_rows == len(raw_df):
         print('1\t0/%s\t1' % len(parsed_df))
 
-    # If the number of rows in the raw dataframe is the same as the number of rows in the dataframe with all empty
-    # rows dropped
+    # If the number of rows in the raw dataframe is the same as the number of rows in the dataframe with all empty rows dropped
     elif len(drop_empty) == len(parsed_df):
         print('1\t0/%s\t1' % len(parsed_df))
         raw_df = drop_empty
@@ -460,17 +431,11 @@ def drop_common(parsed_df, raw_df):
 
 
 def remove_whitespace(df):
-    '''
-    Function to remove whitespace from the column headers.
-    '''
     df.columns = df.columns.str.strip()
     return df
 
 
 def process_df(df):
-    '''
-    Helper function to process a dataframe.
-    '''
     # Define the replacements
     replacements = {
         '，': '_',
@@ -527,10 +492,6 @@ def print_tail(df, ten=False):
 
 
 def edit_df(parsed_df, file_path):
-    '''
-    Function to edit the dataframe.
-    '''
-
     # # Drop columns that have all duplicate cells
     # no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
     #
@@ -548,17 +509,10 @@ def edit_df(parsed_df, file_path):
 
 
 def is_df(df):
-    '''
-    Function to check if the input is a dataframe.
-    '''
     return isinstance(df, pd.DataFrame)
 
 
 def print_results(parsed_df, raw_df):
-    '''
-    Function to print the results.
-    '''
-
     # Print the file path
     file_path = print_file_path()
 
