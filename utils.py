@@ -453,17 +453,13 @@ def print_file_path():
     return path
 
 
-def head(df, ten=False):
-    rows_to_print = 10 if ten else 5
-
+def head(df, rows_to_print=5):
     print()
     print(df.head(rows_to_print))
     hr()
 
 
-def tail(df, ten=False):
-    rows_to_print = 10 if ten else 5
-
+def tail(df, rows_to_print=5):
     if len(df) > rows_to_print * 2:
         print(df.tail(rows_to_print))
         hr()
@@ -508,5 +504,5 @@ def results(parsed_df, raw_df):
 
     else:
         print('Parsed:', len(parsed_df))
-        head(parsed_df, True)
-        tail(parsed_df, True)
+        head(parsed_df, 10)
+        tail(parsed_df, 10)
