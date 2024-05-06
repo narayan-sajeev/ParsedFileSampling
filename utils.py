@@ -29,8 +29,8 @@ def get_files(PROV):
     # Retrieve all files that are not URLs, have only one occurrence, and have a corresponding .pkl.gz file
     pkl_files = [f for f in shuffled if
                  f.count('http') == 0 and shuffled.count(f) == 1 and shuffled.count(f + '.pkl.gz') == 1]
-    # valid_files = [f for f in pkl_files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
     # Retrieve only files that are Excel, Word, HTML, or PDF files
+    # valid_files = [f for f in pkl_files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
     valid_files = [f for f in pkl_files if any(e in f for e in ['doc', 'docx', 'html', 'pdf'])]
     # Remove files that contain '商', '饮', or '酒'
     files = [f for f in valid_files if not any(c in f for c in ['商', '饮', '酒'])]
