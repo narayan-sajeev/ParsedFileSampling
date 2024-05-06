@@ -7,15 +7,9 @@ from random import shuffle
 
 import pandas as pd
 
-# Define the root directory where the parsed files are located
 ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
-
-# Define the directory where the parsed files are located
 DIR = ''
-
-# Define the file name
 FILE_NAME = ''
-
 FILES_PER_PROV = 10
 
 
