@@ -20,12 +20,12 @@ def get_files(PROV):
     shuffled = os.listdir(DIR)
     shuffle(shuffled)
     # Retrieve all files that are not URLs, have only one occurrence, and have a corresponding pickle file
+    pkl_files = [f for f in shuffled if shuffled.count(f) == 1 and shuffled.count(f + '.pkl.gz') == 1]
     # Retrieve only files that are Excel, Word, HTML, or PDF files
-    # Remove files that contain '商', '饮', or '酒'
-    # 'xls', 'xlsx'
-    files = [f for f in shuffled if
-             f.count('http') == 0 and shuffled.count(f) == 1 and shuffled.count(f + '.pkl.gz') == 1 and any(
-                 e in f for e in ['doc', 'docx', 'html', 'pdf']) and not any(c in f for c in ['商', '饮', '酒'])]
+    # valid_files = [f for f in pkl_files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
+    valid_files = [f for f in pkl_files if any(e in f for e in ['doc', 'docx', 'html', 'pdf'])]
+    # Remove files that contain 'http', '商', '饮', or '酒'
+    files = [f for f in valid_files if not any(c in f for c in ['http', '商', '饮', '酒'])]
 
     # Retrieve first few files
     files = sorted(files[:FILES_PER_PROV])
