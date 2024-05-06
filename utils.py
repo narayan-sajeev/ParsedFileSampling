@@ -273,41 +273,33 @@ def process_date_col(date):
 
     date = date.split(' ')[-1]
 
-    rem = ['D', 'J', 'T', '产', '加', '号', '品', '工', '批', '日', '期', '样', '检', '生', '疫', '购', '进']
+    remove = ['D', 'J', 'T', '产', '加', '号', '品', '工', '批', '日', '期', '样', '检', '生', '疫', '购', '进']
 
     # Remove unnecessary parts from the date column
-    for r in rem:
+    for r in remove:
         date = date.replace(r, '')
 
     date = date.replace('年', '-').replace('月', '-')
-    date = re.sub(r'[ /.-]', '', date[:10])
-    date = date.rstrip('-')
-    date = date.split('～')[0]
-    date = date.split()[0]
+    date = re.sub(r'[ /.-]', '', date[:10]).rstrip('-').split('～')[0].split()[0]
 
-    # If the date column has only one '-', return None
     if date.count('-') == 1:
         return None
 
-    # If the date is an integer, try to convert it to a datetime object
     if date.isdigit():
         try:
             return datetime.strptime(date, '%Y%m%d').strftime('%Y-%m-%d')
         except:
             return None
 
-    # Format the date column
     date = '-'.join(date.split('-')[:3])
 
-    # Try to convert the date to a datetime object in different formats
     date_formats = ['%Y-%m%d', '%m-%d-%Y', '%Y-%m-%d']
-    for fmt in date_formats:
+    for format in date_formats:
         try:
-            return datetime.strptime(date, fmt).strftime('%Y-%m-%d')
+            return datetime.strptime(date, format).strftime('%Y-%m-%d')
         except ValueError:
             pass
 
-    # Return the original value
     return date
 
 
