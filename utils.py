@@ -19,7 +19,7 @@ def get_files(PROV):
 
     shuffled = os.listdir(DIR)
     shuffle(shuffled)
-    # Retrieve all files that are not URLs, have only one occurrence, and have a corresponding .pkl.gz file
+    # Retrieve all files that are not URLs, have only one occurrence, and have a corresponding pickle file
     pkl_files = [f for f in shuffled if
                  f.count('http') == 0 and shuffled.count(f) == 1 and shuffled.count(f + '.pkl.gz') == 1]
     # Retrieve only files that are Excel, Word, HTML, or PDF files
@@ -252,7 +252,7 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
 
     NUM -= 1
 
-    # Add .pkl.gz to the file name
+    # Add extension to the file name
     FILE_NAMES = [f + '.pkl.gz' for f in FILE_NAMES]
 
     global FILE_NAME
