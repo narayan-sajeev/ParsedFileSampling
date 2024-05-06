@@ -3,7 +3,7 @@ import os
 import re
 import warnings
 from datetime import datetime
-from random import shuffle
+from random import choices
 
 import pandas as pd
 
@@ -17,20 +17,18 @@ def get_files(PROV):
     global DIR
     DIR = ROOT_DIR + PROV
 
-    shuffled = os.listdir(DIR)
-    shuffle(shuffled)
-    # Retrieve all files that are not URLs, have only one occurrence, and have a corresponding pickle file
-    pkl_files = [f for f in shuffled if shuffled.count(f) == 1 and shuffled.count(f + '.pkl.gz') == 1]
-    # Retrieve only files that are Excel, Word, HTML, or PDF files
-    # valid_files = [f for f in pkl_files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
-    valid_files = [f for f in pkl_files if any(e in f for e in ['doc', 'docx', 'html', 'pdf'])]
-    # Remove files that contain 'http', '商', '饮', or '酒'
-    files = [f for f in valid_files if not any(c in f for c in ['http', '商', '饮', '酒'])]
+    # Retrieve all files in the directory
+    files = os.listdir(DIR)
+    # Unique files with corresponding pickle file
+    files = [f for f in os.listdir(DIR) if files.count(f) == 1 and files.count(f + '.pkl.gz') == 1]
+    # Valid extensions
+    # files = [f for f in pkl_files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
+    files = [f for f in files if any(e in f for e in ['doc', 'docx', 'html', 'pdf'])]
+    # Remove files with 'http', '商', '饮', or '酒'
+    files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒'])]
 
-    # Retrieve first few files
-    files = sorted(files[:FILES_PER_PROV])
-
-    print('\n'.join(files))
+    # Randomly select from valid files
+    print('\n'.join(sorted(choices(files, k=FILES_PER_PROV))))
 
     quit()
 
