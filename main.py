@@ -14,7 +14,7 @@ parsed_df, raw_df = init(PROV, FILE_NAMES, FILE_NUM, col_headers)
 
 if df_exists(raw_df):
     parsed_df, raw_df = drop_common_cols(parsed_df, raw_df)
-    print_results(parsed_df, raw_df)
+    results(parsed_df, raw_df)
 
 else:
-    print_results(parsed_df, None)
+    results(parsed_df, None)

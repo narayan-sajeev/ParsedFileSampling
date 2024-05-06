@@ -30,7 +30,6 @@ def get_files(PROV):
     # Retrieve first few files
     files = sorted(files[:FILES_PER_PROV])
 
-    # Print the first 25 files in the list
     print('\n'.join(files))
 
     quit()
@@ -177,19 +176,18 @@ def drop_columns(df, col_headers):
     # Drop columns that have all NaN values
     drop_df = df.dropna(axis=1, how='all')
 
-    dropped = []
+    dropped_cols = []
 
     # Check for dropped column headers
     for col in df.columns:
         if col not in drop_df.columns:
-            dropped.append(col)
+            dropped_cols.append(col)
 
     col_headers = sorted(col_headers)
 
-    # Print unmatched and dropped column headers
-    if len(dropped) > 0 and len(col_headers) > 0:
+    if len(dropped_cols) > 0 and len(col_headers) > 0:
         print('\'%s\'' % ('\', \''.join(col_headers)))
-        print(dropped)
+        print(dropped_cols)
 
     return drop_df
 
@@ -390,7 +388,6 @@ def drop_common_cols(parsed_df, raw_df):
         raw_df = drop_empty
 
     else:
-        # Print the number of rows in the parsed and raw dataframes
         print('Raw:', len(raw_df))
         print('Parsed:', unique_rows)
 
@@ -461,27 +458,23 @@ def print_file_path():
     return path
 
 
-def print_head(df, ten=False):
-    # Set the number of rows to be printed
-    num = 10 if ten else 5
+def head(df, ten=False):
+    rows_to_print = 10 if ten else 5
 
-    # Print first few rows of the dataframe
     print()
-    print(df.head(num))
+    print(df.head(rows_to_print))
     hr()
 
 
-def print_tail(df, ten=False):
-    # Set the number of rows to be printed
-    num = 10 if ten else 5
+def tail(df, ten=False):
+    rows_to_print = 10 if ten else 5
 
-    # Print last few rows of the dataframe
-    if len(df) > num * 2:
-        print(df.tail(num))
+    if len(df) > rows_to_print * 2:
+        print(df.tail(rows_to_print))
         hr()
 
-    elif len(df) > num:
-        print(df.tail(len(df) - num))
+    elif len(df) > rows_to_print:
+        print(df.tail(len(df) - rows_to_print))
         hr()
 
 
@@ -506,26 +499,19 @@ def df_exists(df):
     return isinstance(df, pd.DataFrame)
 
 
-def print_results(parsed_df, raw_df):
-    # Print the file path
+def results(parsed_df, raw_df):
     file_path = print_file_path()
 
-    # Edit the dataframe
     parsed_df = edit_df(parsed_df, file_path)
 
-    # If the raw dataframe exists (if it's an Excel file)
     if df_exists(raw_df):
-        # Print first few rows of the dataframes
-        print_head(parsed_df)
-        print_head(raw_df)
+        head(parsed_df)
+        head(raw_df)
 
-        # Print last few rows of the dataframes
-        print_tail(parsed_df)
-        print_tail(raw_df)
+        tail(parsed_df)
+        tail(raw_df)
 
-    # If the raw dataframe doesn't exist (if it's a PDF file)
     else:
-        # Print first & last few rows of the dataframe
         print('Parsed:', len(parsed_df))
-        print_head(parsed_df, True)
-        print_tail(parsed_df, True)
+        head(parsed_df, True)
+        tail(parsed_df, True)
