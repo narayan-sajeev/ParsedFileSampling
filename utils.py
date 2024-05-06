@@ -50,22 +50,17 @@ def clean_cols(headers):
     return [n.replace('\n', '').replace('\r', '').replace('\xa0', '').replace(' ', '').strip('\u2003') for n in headers]
 
 
-def check_substring(substr_sets, k):
+def substring(substr_sets, k):
     substr_dict = {}
     for s in substr_sets:
         substr_dict[s] = any([i in k for i in substr_sets[s]])
     return substr_dict
 
 
-def substring(df, col_headers):
-    # Get the known column headers
+def check_substring(df, col_headers):
     known_cols = get_known_cols()
-
-    # Clean up the column headers
     col_headers = clean_cols(col_headers)
-
-    # Drop unnecessary columns from column headers
-    col_headers = drop_useless_cols(col_headers)
+    col_headers = remove_useless_cols(col_headers)
 
     # dictionary of substrings to check for in column headers
     substr_sets = {
@@ -109,7 +104,7 @@ def substring(df, col_headers):
 
     # check substrings for unmatched columns
     for k in unmatched_cols:
-        substr_dict = check_substring(substr_sets, k)
+        substr_dict = substring(substr_sets, k)
         if '日期' in k and '生产' in k:
             continue
         if '日期' in k and substr_dict['announcement_date']:
@@ -162,35 +157,35 @@ def substring(df, col_headers):
     return review_cols
 
 
-def drop_columns(df, col_headers):
-    cols = ['manufacturer_name', 'manufacturer_address', 'sampled_location_name', 'sampled_location_address',
-            'food_name', 'specifications_model', 'announcement_date', 'production_date',
-            'product_classification', 'task_source_or_project_name', 'testing_agency', 'adulterant',
-            'inspection_results', 'failing_results', 'test_outcome', 'legal_limit']
+def remove_cols(df, col_headers):
+    keep_cols = ['manufacturer_name', 'manufacturer_address', 'sampled_location_name', 'sampled_location_address',
+                 'food_name', 'specifications_model', 'announcement_date', 'production_date',
+                 'product_classification', 'task_source_or_project_name', 'testing_agency', 'adulterant',
+                 'inspection_results', 'failing_results', 'test_outcome', 'legal_limit']
 
     # select only the existing columns from the DataFrame
-    df = df[[col for col in cols if col in df.columns]]
+    df = df[[col for col in keep_cols if col in df.columns]]
 
     # Drop columns that have all NaN values
-    drop_df = df.dropna(axis=1, how='all')
+    empty_df = df.dropna(axis=1, how='all')
 
-    dropped_cols = []
+    removed_cols = []
 
-    # Check for dropped column headers
+    # Check for removed column headers
     for col in df.columns:
-        if col not in drop_df.columns:
-            dropped_cols.append(col)
+        if col not in empty_df.columns:
+            removed_cols.append(col)
 
     col_headers = sorted(col_headers)
 
-    if len(dropped_cols) > 0 and len(col_headers) > 0:
+    if len(removed_cols) > 0 and len(col_headers) > 0:
         print('\'%s\'' % ('\', \''.join(col_headers)))
-        print(dropped_cols)
+        print(removed_cols)
 
-    return drop_df
+    return empty_df
 
 
-def drop_useless_cols(col_headers):
+def remove_useless_cols(col_headers):
     col_headers = list(col_headers)
 
     remove_cols = ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市',
@@ -250,30 +245,18 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
     global FILE_NAME
     FILE_NAME = FILE_NAMES[NUM]
 
-    # Read the raw Excel file
     raw_df = read_excel()
-
-    # Read the DataFrame from the pickle file
     parsed_df = pkl_to_df()
-
-    # Check substrings for unmatched columns
-    review_cols = substring(parsed_df, col_headers)
-
-    # Drop unnecessary columns from the DataFrame
-    parsed_df = drop_columns(parsed_df, review_cols)
-
-    # Remove whitespace from the column headers
+    review_cols = check_substring(parsed_df, col_headers)
+    parsed_df = remove_cols(parsed_df, review_cols)
     parsed_df = remove_whitespace(parsed_df)
 
-    # If the raw DataFrame exists (if it's an Excel file)
     if df_exists(raw_df):
-        # Drop unnecessary columns from the DataFrame
-        raw_columns = drop_useless_cols(raw_df.columns)
+        raw_columns = remove_useless_cols(raw_df.columns)
 
         # Select only the columns that are in the raw DataFrame
         raw_df = raw_df.loc[:, raw_columns]
 
-        # Remove whitespace from the column headers
         raw_df = remove_whitespace(raw_df)
 
     return parsed_df, raw_df
@@ -328,30 +311,23 @@ def process_date_col(date):
     return date
 
 
-def drop_common_cols(parsed_df, raw_df):
-    # Process the production date columns
+def remove_common_cols(parsed_df, raw_df):
     date_cols = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
                  '生产日期（批号）', '生产日期/批号/购进日期', '生产/购进日期', '生产日期(批号)', '生产日期\n（购进日期）']
 
     for col in date_cols:
-        # Try to process the date column
         try:
             # Apply the process_date function to the date column
             raw_df[col] = raw_df[col].apply(process_date_col)
         except:
             pass
 
-    prod_date = 'production_date'
+    if 'production_date' in parsed_df.columns:
+        parsed_df['production_date'] = parsed_df['production_date'].apply(process_date_col)
 
-    if prod_date in parsed_df.columns:
-        # Process the production date columns
-        parsed_df[prod_date] = parsed_df[prod_date].apply(process_date_col)
-
-    # Process the DataFrames
     parsed_df = process_df(parsed_df)
     raw_df = process_df(raw_df)
 
-    # Replace all pd.NaT with None
     raw_df = raw_df.replace({pd.NaT: None})
 
     # Try to split the '不合格项目‖检验结果‖标准值' column into three columns
@@ -364,8 +340,7 @@ def drop_common_cols(parsed_df, raw_df):
     # Find the number of unique rows to be the number of rows in the parsed DataFrame
     unique_rows = len(parsed_df)
 
-    # Drop all rows that have all NaN values
-    drop_empty = raw_df.dropna(how='all')
+    empty_rows = raw_df.dropna(how='all')
 
     # Find the number of unique rows to be the number of rows in the parsed DataFrame
     try:
@@ -377,18 +352,18 @@ def drop_common_cols(parsed_df, raw_df):
     if unique_rows == len(raw_df):
         print('1\t0/%s\t1' % len(parsed_df))
 
-    # If the number of rows in the raw DataFrame is the same as the number of rows in the DataFrame with all empty rows dropped
-    elif len(drop_empty) == len(parsed_df):
+    # If the number of rows in the raw DataFrame is the same as the number of rows in the DataFrame with all empty rows removed
+    elif len(empty_rows) == len(parsed_df):
         print('1\t0/%s\t1' % len(parsed_df))
-        raw_df = drop_empty
+        raw_df = empty_rows
 
     else:
         print('Raw:', len(raw_df))
         print('Parsed:', unique_rows)
 
-    drop_cols = []
+    remove_cols = []
 
-    # Drop columns that are common to both the parsed and raw DataFrames
+    # Remove columns that are common to both the parsed and raw DataFrames
     for col1 in parsed_df.columns:
         # Iterate through the columns in the raw DataFrame
         for col2 in raw_df.columns:
@@ -406,14 +381,14 @@ def drop_common_cols(parsed_df, raw_df):
                 raw_df = raw_df.iloc[:-1]
                 l2 = list(raw_df[col2])
 
-            # If the cells are the same, drop the column
+            # If the cells are the same, remove the column
             if l1[:5] == l2[:5] and l1[-5:] == l2[-5:]:
-                # Add the column to the list of columns to be dropped
-                drop_cols.append(col1)
+                # Add the column to the list of columns to be removed
+                remove_cols.append(col1)
                 break
 
-    # Drop the columns from the DataFrame
-    parsed_df = parsed_df.drop(drop_cols, axis=1)
+    # Remove the columns from the DataFrame
+    parsed_df = parsed_df.drop(remove_cols, axis=1)
 
     # Replace all 'Non' with None
     parsed_df = parsed_df.applymap(lambda x: None if x == 'Non' else x)
