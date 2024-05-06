@@ -1,4 +1,3 @@
-# Function to get all file names from a directory
 import json
 import os
 import re
