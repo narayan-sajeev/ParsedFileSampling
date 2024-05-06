@@ -463,10 +463,9 @@ def print_file_path():
 
 
 def print_head(df, ten=False):
-    '''
-    Function to print the first few rows of the dataframe.
-    '''
+    # Set the number of rows to be printed
     num = 10 if ten else 5
+
     # Print first few rows of the dataframe
     print()
     print(df.head(num))
@@ -474,10 +473,6 @@ def print_head(df, ten=False):
 
 
 def print_tail(df, ten=False):
-    '''
-    Function to print the last few rows of the dataframe.
-    '''
-
     # Set the number of rows to be printed
     num = 10 if ten else 5
 
