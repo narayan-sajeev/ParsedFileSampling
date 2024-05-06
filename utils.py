@@ -273,7 +273,7 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
     parsed_df = remove_whitespace(parsed_df)
 
     # If the raw dataframe exists (if it's an Excel file)
-    if is_df(raw_df):
+    if df_exists(raw_df):
         # Drop unnecessary columns from the dataframe
         raw_columns = drop_useless_cols(raw_df.columns)
 
@@ -502,7 +502,7 @@ def edit_df(parsed_df, file_path):
     return parsed_df
 
 
-def is_df(df):
+def df_exists(df):
     return isinstance(df, pd.DataFrame)
 
 
@@ -514,7 +514,7 @@ def print_results(parsed_df, raw_df):
     parsed_df = edit_df(parsed_df, file_path)
 
     # If the raw dataframe exists (if it's an Excel file)
-    if is_df(raw_df):
+    if df_exists(raw_df):
         # Print first few rows of the dataframes
         print_head(parsed_df)
         print_head(raw_df)
