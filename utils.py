@@ -27,11 +27,17 @@ def get_files(PROV):
     files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒'])]
 
     # Randomly select from valid files
-    files = sorted(sample(files, FILES_PER_PROV))
+    try:
+        files = sample(files, FILES_PER_PROV)
+    except:
+        pass
 
-    print('\n'.join(files))
-    hr()
-    print('\'%s\'' % '\', \''.join(files))
+    files = sorted(files)
+
+    if files:
+        print('\n'.join(files))
+        hr()
+        print('\'%s\'' % '\', \''.join(files))
 
     quit()
 
