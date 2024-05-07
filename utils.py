@@ -2,7 +2,7 @@ import json
 import os
 import re
 from datetime import datetime
-from random import sample
+from random import shuffle
 
 import pandas as pd
 
@@ -27,12 +27,8 @@ def get_files(PROV):
     files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒'])]
 
     # Randomly select from valid files
-    try:
-        files = sample(files, FILES_PER_PROV)
-    except:
-        pass
-
-    files = sorted(files)
+    shuffle(files)
+    files = sorted(files[:FILES_PER_PROV])
 
     if files:
         print('\n'.join(files))
