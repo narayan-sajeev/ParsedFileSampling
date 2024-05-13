@@ -269,16 +269,17 @@ def process_date_col(date):
         return None
 
     # Convert the date column to a string and remove unnecessary parts
-    date = str(date).split('：')[-1].strip()
+    date = str(date).split('：')[-1]
     date = date.lstrip('/')
 
-    date = date.split(' ')[-1]
-
-    remove = ['D', 'J', 'T', '产', '加', '号', '品', '工', '批', '日', '期', '样', '检', '生', '疫', '购', '进']
+    remove = ['D', 'J', 'T', '产', '加', '号', '品', '工', '批', '日', '期', '样', '检', '生', '疫', '购', '进',
+              '00:00:00', '(', ')']
 
     # Remove unnecessary parts from the date column
     for r in remove:
         date = date.replace(r, '')
+
+    date = date.strip().split(' ')[-1]
 
     date = date.replace('年', '-').replace('月', '-')
     date = re.sub(r'[ /.-]', '', date[:10]).rstrip('-').split('～')[0].split()[0]
