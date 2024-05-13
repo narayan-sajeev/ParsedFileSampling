@@ -9,7 +9,7 @@ import pandas as pd
 ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
 DIR = ''
 FILE_NAME = ''
-FILES_PER_PROV = 10
+FILES_PER_PROV = 25
 
 
 def get_files(PROV):
@@ -21,10 +21,9 @@ def get_files(PROV):
     # Unique files with corresponding pickle file
     files = [f for f in os.listdir(DIR) if files.count(f) == 1 and files.count(f + '.pkl.gz') == 1]
     # Valid extensions
-    # files = [f for f in pkl_files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
-    files = [f for f in files if any(e in f for e in ['doc', 'docx', 'html', 'pdf'])]
+    files = [f for f in files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
     # Remove files with 'http', '商', '饮', or '酒'
-    files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒'])]
+    files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒', '╜'])]
 
     # Randomly select from valid files
     shuffle(files)
@@ -439,15 +438,15 @@ def tail(df, rows_to_print=5):
 
 
 def edit_df(parsed_df, file_path):
-    # # Drop columns that have all duplicate cells
-    # no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
-    #
-    # # If the DataFrame has no columns or only has the inspection results column or has duplicate values, quit
-    # if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
-    #     quit()
-    #
-    # # Set the DataFrame to be the DataFrame with no duplicate columns
-    # parsed_df = no_dup_df
+    # Drop columns that have all duplicate cells
+    no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
+
+    # If the DataFrame has no columns or only has the inspection results column or has duplicate values, quit
+    if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
+        quit()
+
+    # Set the DataFrame to be the DataFrame with no duplicate columns
+    parsed_df = no_dup_df
 
     # Open the file
     os.system(file_path)
