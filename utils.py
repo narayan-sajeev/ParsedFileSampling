@@ -403,8 +403,8 @@ def process_df(df):
     }
 
     # Apply the replacements
-    for old, new in replacements.items():
-        df = df.applymap(lambda x: x.replace(old, new) if isinstance(x, str) else x)
+    for tup in replacements.items():
+        df = df.applymap(lambda x: x.replace(tup[0], tup[1]) if isinstance(x, str) else x)
 
     # Fill all NaN values with '/'
     df = df.fillna('/')
