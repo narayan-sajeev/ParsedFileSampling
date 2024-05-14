@@ -380,7 +380,6 @@ def remove_common_cols(parsed_df, raw_df):
             if l1[:5] == l2[:5] and l1[-5:] == l2[-5:]:
                 # Add the column to the list of columns to be removed
                 remove_cols.append(col1)
-                break
 
     # Remove the columns from the DataFrame
     parsed_df = parsed_df.drop(remove_cols, axis=1)
