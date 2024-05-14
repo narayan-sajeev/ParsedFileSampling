@@ -306,16 +306,16 @@ def process_date_col(date):
 
 
 def remove_common_cols(parsed_df, raw_df):
-    date_cols = ['生产日期/批号', '生产日期', '生产日期或批号', '生产(购进）日期/批号', '标称生产日期/批号',
-                 '生产日期（批号）', '生产日期/批号/购进日期', '生产/购进日期', '生产日期(批号)', '生产日期\n（购进日期）',
-                 '生产/加工/检疫/购进日期', '生产/加工/购进日期']
+    production = '生产'
+    date = '日期'
 
-    for col in date_cols:
-        try:
-            # Apply the process_date function to the date column
-            raw_df[col] = raw_df[col].apply(process_date_col)
-        except:
-            pass
+    for col in raw_df.columns:
+        if type(col) == str and production in col and date in col:
+            try:
+                # Apply the process_date function to the date column
+                raw_df[col] = raw_df[col].apply(process_date_col)
+            except:
+                pass
 
     if 'production_date' in parsed_df.columns:
         parsed_df['production_date'] = parsed_df['production_date'].apply(process_date_col)
