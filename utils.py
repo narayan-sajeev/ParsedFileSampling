@@ -22,13 +22,14 @@ def get_files(PROV):
     files = [f for f in os.listdir(DIR) if files.count(f) == 1 and files.count(f + '.pkl.gz') == 1]
     # Valid extensions
     files = [f for f in files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
-    # Remove files with 'http', '商', '饮', or '酒'
+    # Remove files with invalid characters
     files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒', '╜'])]
 
     # Randomly select from valid files
     shuffle(files)
     files = sorted(files[:FILES_PER_PROV])
 
+    # Print the files
     if files:
         print('\n'.join(files))
         hr()
@@ -37,6 +38,7 @@ def get_files(PROV):
     quit()
 
 
+# Convert the pickle file to a DataFrame
 def pkl_to_df():
     return pd.read_pickle('%s/%s' % (DIR, FILE_NAME))
 
@@ -47,8 +49,23 @@ def get_known_cols():
         return json.load(f)
 
 
-def clean_cols(headers):
-    return [n.replace('\n', '').replace('\r', '').replace('\xa0', '').replace(' ', '').strip('\u2003') for n in headers]
+# Remove unnecessary characters from the column headers
+def clean_cols(df=None, headers=None):
+    # Characters to remove
+    remove = ['\n', '\r', '\xa0', ' ', '\u2003']
+    # If the DataFrame exists, get the column headers
+    if df is not None:
+        headers = [str(h) for h in df.columns]
+    # Remove the characters from the column headers
+    for h in headers:
+        for r in remove:
+            h = h.strip().replace(r, '')
+    # If the DataFrame exists, set the column headers to the cleaned column headers
+    if df is not None:
+        df.columns = headers
+        return df
+    # Otherwise, return the cleaned column headers
+    return headers
 
 
 def substring(substr_sets, k):
@@ -60,10 +77,10 @@ def substring(substr_sets, k):
 
 def check_substring(df, col_headers):
     known_cols = get_known_cols()
-    col_headers = clean_cols(col_headers)
-    col_headers = remove_useless_cols(col_headers)
+    col_headers = clean_cols(headers=col_headers)
+    col_headers = remove_raw_cols(col_headers)
 
-    # dictionary of substrings to check for in column headers
+    # Dictionary of substrings to check for in column headers
     substr_sets = {
         'announcement_date': ['检', '抽', '报', '公布'],
         'address': ['地址', '所在地'],
@@ -81,7 +98,7 @@ def check_substring(df, col_headers):
         'illegal': ['违法']
     }
 
-    # list of possible inspection result values
+    # List of possible inspection result values
     insp_res_vals = [
         '合格',
         '合  格',
@@ -98,12 +115,12 @@ def check_substring(df, col_headers):
 
     review_cols = []
 
-    # check for unmatched column headers
+    # Check for unmatched column headers
     for term in col_headers:
         if term not in known_cols:
             unmatched_cols.append(term)
 
-    # check substrings for unmatched columns
+    # Check substrings for unmatched columns
     for k in unmatched_cols:
         substr_dict = substring(substr_sets, k)
         if '日期' in k and '生产' in k:
@@ -158,13 +175,13 @@ def check_substring(df, col_headers):
     return review_cols
 
 
-def remove_cols(df, col_headers):
+def remove_parsed_cols(df, col_headers):
     keep_cols = ['manufacturer_name', 'manufacturer_address', 'sampled_location_name', 'sampled_location_address',
                  'food_name', 'specifications_model', 'announcement_date', 'production_date',
                  'product_classification', 'task_source_or_project_name', 'testing_agency', 'adulterant',
                  'inspection_results', 'failing_results', 'test_outcome', 'legal_limit']
 
-    # select only the existing columns from the DataFrame
+    # Select only the existing columns from the DataFrame
     df = df[[col for col in keep_cols if col in df.columns]]
 
     # Drop columns that have all NaN values
@@ -179,6 +196,7 @@ def remove_cols(df, col_headers):
 
     col_headers = sorted(col_headers)
 
+    # Print the removed columns
     if len(removed_cols) > 0 and len(col_headers) > 0:
         print('\'%s\'' % ('\', \''.join(col_headers)))
         print(removed_cols)
@@ -186,7 +204,7 @@ def remove_cols(df, col_headers):
     return empty_df
 
 
-def remove_useless_cols(col_headers):
+def remove_raw_cols(col_headers):
     col_headers = list(col_headers)
 
     remove_cols = ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市',
@@ -200,7 +218,97 @@ def remove_useless_cols(col_headers):
                    '合格样品（批次）', '监督抽检样品（批次）', '备案人', '备案人地址', '备案登记号',
                    '监督抽检样品总量/批次', '省级匹配任务增加检验项目', '风险等级']
 
-    return [header for header in col_headers if header not in remove_cols]
+    # Remove the columns that are in the list of columns to be removed
+    return [col_header for col_header in col_headers if col_header not in remove_cols]
+
+
+def remove_common_cols(parsed_df, raw_df):
+    production = '生产'
+    date = '日期'
+
+    # Iterate through the columns in the raw DataFrame
+    for col in raw_df.columns:
+        if type(col) == str and production in col and date in col:
+            try:
+                # Apply the process_date function to the date column
+                raw_df[col] = raw_df[col].apply(process_date_col)
+            except:
+                pass
+
+    # Iterate through the columns in the parsed DataFrame
+    if 'production_date' in parsed_df.columns:
+        # Apply the process_date function to the date column
+        parsed_df['production_date'] = parsed_df['production_date'].apply(process_date_col)
+
+    parsed_df = process_df(parsed_df)
+    raw_df = process_df(raw_df)
+
+    # Replace all 'Non' with None
+    raw_df = raw_df.replace({pd.NaT: None})
+
+    # Try to split the '不合格项目‖检验结果‖标准值' column into three columns
+    try:
+        raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df['不合格项目‖检验结果‖标准值'].str.split('‖',
+                                                                                                               expand=True)
+    except:
+        pass
+
+    # Find the number of unique rows to be the number of rows in the parsed DataFrame
+    unique_rows = len(parsed_df)
+
+    empty_rows = raw_df.dropna(how='all')
+
+    # Find the number of unique rows to be the number of rows in the parsed DataFrame
+    try:
+        unique_rows = parsed_df['failing_results'].nunique()
+    except:
+        pass
+
+    # If the number of unique rows in the parsed DataFrame is the same as the number of rows in the raw DataFrame
+    if unique_rows == len(raw_df):
+        print('1\t0/%s\t1' % len(parsed_df))
+
+    # If the number of rows in the raw DataFrame is the same as the number of rows in the DataFrame with all empty rows removed
+    elif len(empty_rows) == len(parsed_df):
+        print('1\t0/%s\t1' % len(parsed_df))
+        raw_df = empty_rows
+
+    else:
+        print('Parsed:', unique_rows)
+        print('Raw:', len(raw_df))
+
+    cols = []
+
+    # Remove columns that are common to both the parsed and raw DataFrames
+    for col1 in parsed_df.columns:
+        # Iterate through the columns in the raw DataFrame
+        for col2 in raw_df.columns:
+            # Get the lists of cells in the columns
+            l1 = list(parsed_df[col1])
+            l2 = list(raw_df[col2])
+
+            # Remove the last row if it contains '注：排名不分先后'
+            while '注：排名不分先后' in l1:
+                parsed_df = parsed_df.iloc[:-1]
+                l1 = list(parsed_df[col1])
+
+            # Remove the last row if it contains '注：排名不分先后'
+            while '注：排名不分先后' in l2:
+                raw_df = raw_df.iloc[:-1]
+                l2 = list(raw_df[col2])
+
+            # If the cells are the same, remove the column
+            if l1[:5] == l2[:5] and l1[-5:] == l2[-5:]:
+                # Add the column to the list of columns to be removed
+                cols.append(col1)
+
+    # Remove the columns from the DataFrame
+    parsed_df = parsed_df.drop(cols, axis=1)
+
+    # Replace all 'Non' with None
+    parsed_df = parsed_df.applymap(lambda x: None if x == 'Non' else x)
+
+    return parsed_df, raw_df
 
 
 def hr():
@@ -217,6 +325,7 @@ def read_excel():
         raw_df = pd.read_excel(get_path())
     except:
         return False
+
     # Get the index of the first occurrence
     try:
         idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
@@ -226,8 +335,10 @@ def read_excel():
         raw_df = raw_df.loc[idx + 1:]
     except:
         pass
+
     # Fill all NaN values with '/'
     raw_df = raw_df.fillna('/')
+
     return raw_df
 
 
@@ -249,16 +360,17 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
     raw_df = read_excel()
     parsed_df = pkl_to_df()
     review_cols = check_substring(parsed_df, col_headers)
-    parsed_df = remove_cols(parsed_df, review_cols)
-    parsed_df = remove_whitespace(parsed_df)
+    parsed_df = remove_parsed_cols(parsed_df, review_cols)
+    parsed_df = clean_cols(parsed_df)
 
+    # If the raw DataFrame exists
     if df_exists(raw_df):
-        raw_columns = remove_useless_cols(raw_df.columns)
+        raw_columns = remove_raw_cols(raw_df.columns)
 
         # Select only the columns that are in the raw DataFrame
         raw_df = raw_df.loc[:, raw_columns]
 
-        raw_df = remove_whitespace(raw_df)
+        raw_df = clean_cols(raw_df)
 
     return parsed_df, raw_df
 
@@ -305,96 +417,6 @@ def process_date_col(date):
     return date
 
 
-def remove_common_cols(parsed_df, raw_df):
-    production = '生产'
-    date = '日期'
-
-    for col in raw_df.columns:
-        if type(col) == str and production in col and date in col:
-            try:
-                # Apply the process_date function to the date column
-                raw_df[col] = raw_df[col].apply(process_date_col)
-            except:
-                pass
-
-    if 'production_date' in parsed_df.columns:
-        parsed_df['production_date'] = parsed_df['production_date'].apply(process_date_col)
-
-    parsed_df = process_df(parsed_df)
-    raw_df = process_df(raw_df)
-
-    raw_df = raw_df.replace({pd.NaT: None})
-
-    # Try to split the '不合格项目‖检验结果‖标准值' column into three columns
-    try:
-        raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df['不合格项目‖检验结果‖标准值'].str.split('‖',
-                                                                                                               expand=True)
-    except:
-        pass
-
-    # Find the number of unique rows to be the number of rows in the parsed DataFrame
-    unique_rows = len(parsed_df)
-
-    empty_rows = raw_df.dropna(how='all')
-
-    # Find the number of unique rows to be the number of rows in the parsed DataFrame
-    try:
-        unique_rows = parsed_df['failing_results'].nunique()
-    except:
-        pass
-
-    # If the number of unique rows in the parsed DataFrame is the same as the number of rows in the raw DataFrame
-    if unique_rows == len(raw_df):
-        print('1\t0/%s\t1' % len(parsed_df))
-
-    # If the number of rows in the raw DataFrame is the same as the number of rows in the DataFrame with all empty rows removed
-    elif len(empty_rows) == len(parsed_df):
-        print('1\t0/%s\t1' % len(parsed_df))
-        raw_df = empty_rows
-
-    else:
-        print('Parsed:', unique_rows)
-        print('Raw:', len(raw_df))
-
-    remove_cols = []
-
-    # Remove columns that are common to both the parsed and raw DataFrames
-    for col1 in parsed_df.columns:
-        # Iterate through the columns in the raw DataFrame
-        for col2 in raw_df.columns:
-            # Get the lists of cells in the columns
-            l1 = list(parsed_df[col1])
-            l2 = list(raw_df[col2])
-
-            # Remove the last row if it contains '注：排名不分先后'
-            while '注：排名不分先后' in l1:
-                parsed_df = parsed_df.iloc[:-1]
-                l1 = list(parsed_df[col1])
-
-            # Remove the last row if it contains '注：排名不分先后'
-            while '注：排名不分先后' in l2:
-                raw_df = raw_df.iloc[:-1]
-                l2 = list(raw_df[col2])
-
-            # If the cells are the same, remove the column
-            if l1[:5] == l2[:5] and l1[-5:] == l2[-5:]:
-                # Add the column to the list of columns to be removed
-                remove_cols.append(col1)
-
-    # Remove the columns from the DataFrame
-    parsed_df = parsed_df.drop(remove_cols, axis=1)
-
-    # Replace all 'Non' with None
-    parsed_df = parsed_df.applymap(lambda x: None if x == 'Non' else x)
-
-    return parsed_df, raw_df
-
-
-def remove_whitespace(df):
-    df.columns = df.columns.str.strip()
-    return df
-
-
 def process_df(df):
     # Define the replacements
     replacements = {
@@ -409,6 +431,7 @@ def process_df(df):
 
     # Fill all NaN values with '/'
     df = df.fillna('/')
+
     # Replace all '/' with None
     df = df.applymap(lambda x: None if x == '/' else x)
 
@@ -422,13 +445,13 @@ def print_file_path():
     return path
 
 
-def head(df, rows_to_print=5):
+def first_rows(df, rows_to_print=5):
     print()
     print(df.head(rows_to_print))
     hr()
 
 
-def tail(df, rows_to_print=5):
+def last_rows(df, rows_to_print=5):
     if len(df) > rows_to_print * 2:
         print(df.tail(rows_to_print))
         hr()
@@ -438,7 +461,8 @@ def tail(df, rows_to_print=5):
         hr()
 
 
-def edit_df(parsed_df, file_path):
+# Drop columns that have all duplicate cells in the parsed DataFrame
+def drop_dup_parsed_cols(parsed_df, file_path):
     # Drop columns that have all duplicate cells
     no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
 
@@ -462,16 +486,20 @@ def df_exists(df):
 def results(parsed_df, raw_df):
     file_path = print_file_path()
 
-    parsed_df = edit_df(parsed_df, file_path)
+    # Drop columns that have all duplicate cells in the parsed DataFrame
+    parsed_df = drop_dup_parsed_cols(parsed_df, file_path)
 
+    # If the raw DataFrame exists
     if df_exists(raw_df):
-        head(parsed_df)
-        head(raw_df)
+        # Print the first rows of the DataFrames
+        first_rows(parsed_df)
+        first_rows(raw_df)
 
-        tail(parsed_df)
-        tail(raw_df)
+        # Print the last rows of the DataFrames
+        last_rows(parsed_df)
+        last_rows(raw_df)
 
     else:
         print('Parsed:', len(parsed_df))
-        head(parsed_df, 10)
-        tail(parsed_df, 10)
+        first_rows(parsed_df, 10)
+        last_rows(parsed_df, 10)
