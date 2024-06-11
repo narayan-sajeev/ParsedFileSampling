@@ -480,7 +480,7 @@ def drop_dup_parsed_cols(parsed_df, file_path):
 
 
 def df_exists(df):
-    return isinstance(df, pd.DataFrame)
+    return isinstance(df, pd.DataFrame) and len(df) > 0
 
 
 def results(parsed_df, raw_df):
