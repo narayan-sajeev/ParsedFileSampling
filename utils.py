@@ -445,19 +445,19 @@ def print_file_path():
     return path
 
 
-def first_rows(df, rows_to_print=5):
+def first_rows(df):
     print()
-    print(df.head(rows_to_print))
+    print(df.head())
     hr()
 
 
-def last_rows(df, rows_to_print=5):
-    if len(df) > rows_to_print * 2:
-        print(df.tail(rows_to_print))
+def last_rows(df):
+    if len(df) > 10:
+        print(df.tail())
         hr()
 
-    elif len(df) > rows_to_print:
-        print(df.tail(len(df) - rows_to_print))
+    elif len(df) > 5:
+        print(df.tail(len(df) - 5))
         hr()
 
 
@@ -501,5 +501,5 @@ def results(parsed_df, raw_df):
 
     else:
         print('Parsed:', len(parsed_df))
-        first_rows(parsed_df, 10)
-        last_rows(parsed_df, 10)
+        first_rows(parsed_df)
+        last_rows(parsed_df)
