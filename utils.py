@@ -342,6 +342,10 @@ def read_excel():
     return raw_df
 
 
+def convert_to_list(col_headers):
+    return col_headers.split('\t')
+
+
 def init(PROV, FILE_NAMES, NUM, col_headers):
     # Set pandas option to display all columns
     pd.set_option('display.max_columns', None)
@@ -359,6 +363,7 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
 
     raw_df = read_excel()
     parsed_df = pkl_to_df()
+    col_headers = convert_to_list(col_headers)
     review_cols = check_substring(parsed_df, col_headers)
     parsed_df = remove_parsed_cols(parsed_df, review_cols)
     parsed_df = clean_cols(parsed_df)
