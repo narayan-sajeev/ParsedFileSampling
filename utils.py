@@ -283,11 +283,6 @@ def remove_common_cols(parsed_df, raw_df):
         print('Parsed:', unique_rows)
         print('Raw:', len(raw_df))
 
-    file_path = print_file_path()
-
-    # Open the file
-    os.system(file_path)
-
     cols = []
 
     # Remove columns that are common to both the parsed and raw DataFrames
@@ -378,6 +373,11 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
 
     global FILE_NAME
     FILE_NAME = FILE_NAMES[NUM]
+
+    file_path = print_file_path()
+
+    # Open the file
+    os.system(file_path)
 
     raw_df = read_excel()
     parsed_df = pkl_to_df()
@@ -489,7 +489,6 @@ def df_exists(df):
 
 
 def results(parsed_df, raw_df):
-
     # If the only column is inspection results, quit
     if list(parsed_df.columns) == ['inspection_results']:
         quit()

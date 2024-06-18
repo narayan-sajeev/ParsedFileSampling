@@ -2,14 +2,16 @@ import pandas as pd
 
 
 def filter_df(parsed_df):
-    # Create new empty DataFrame with the same columns as the input DataFrame
-    filtered = pd.DataFrame(columns=parsed_df.columns)
+    lst = []
     # Iterate through each row in the DataFrame
     for index, row in parsed_df.iterrows():
         # Check if the row is valid
         if check_row(row):
-            # Append the row to the new DataFrame
-            filtered = pd.concat([filtered, pd.DataFrame(row).T])
+            # Append the row to the list
+            lst.append(row)
+
+    # Create a new DataFrame from the list
+    filtered = pd.DataFrame(lst)
 
     # Return the new DataFrame
     return filtered
