@@ -396,7 +396,7 @@ def process_date_col(date):
     date = date.lstrip('/')
 
     remove = ['D', 'J', 'T', '产', '加', '号', '品', '工', '批', '日', '期', '样', '检', '生', '疫', '购', '进',
-              '00:00:00', '(', ')']
+              '00:00:00', '(', ')', '（', '）']
 
     # Remove unnecessary parts from the date column
     for r in remove:
@@ -418,7 +418,7 @@ def process_date_col(date):
 
     date = '-'.join(date.split('-')[:3])
 
-    date_formats = ['%Y-%m%d', '%m-%d-%Y', '%Y-%m-%d']
+    date_formats = ['%Y-%m%d', '%m-%d-%Y', '%Y-%m-%d', '%Y%m%d']
     for format in date_formats:
         try:
             return datetime.strptime(date, format).strftime('%Y-%m-%d')
