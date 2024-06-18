@@ -274,7 +274,7 @@ def remove_common_cols(parsed_df, raw_df):
         raw_df = empty_rows
 
     else:
-        print('Parsed:', len(parsed_df))
+        print('Parsed:', unique_rows)
         print('Raw:', len(raw_df))
 
     cols = []
