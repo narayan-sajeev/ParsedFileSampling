@@ -253,6 +253,12 @@ def remove_common_cols(parsed_df, raw_df):
     except:
         pass
 
+    try:
+        raw_df[['adulterant', 'test_outcome', 'legal_limit']] = raw_df['不合格项目║检验结果║标准值'].str.split('║',
+                                                                                                               expand=True)
+    except:
+        pass
+
     # Find the number of unique rows to be the number of rows in the parsed DataFrame
     unique_rows = len(parsed_df)
 
@@ -466,24 +472,6 @@ def last_rows(df):
         hr()
 
 
-# Drop columns that have all duplicate cells in the parsed DataFrame
-def drop_dup_parsed_cols(parsed_df, file_path):
-    # Drop columns that have all duplicate cells
-    no_dup_df = parsed_df.loc[:, parsed_df.nunique() != 1]
-
-    # If the DataFrame has no columns or only has the inspection results column or has duplicate values, quit
-    if not list(no_dup_df.columns) or list(parsed_df.columns) == ['inspection_results']:
-        quit()
-
-    # Set the DataFrame to be the DataFrame with no duplicate columns
-    parsed_df = no_dup_df
-
-    # Open the file
-    os.system(file_path)
-
-    return parsed_df
-
-
 def df_exists(df):
     return isinstance(df, pd.DataFrame) and len(df) > 0
 
@@ -491,8 +479,12 @@ def df_exists(df):
 def results(parsed_df, raw_df):
     file_path = print_file_path()
 
-    # Drop columns that have all duplicate cells in the parsed DataFrame
-    parsed_df = drop_dup_parsed_cols(parsed_df, file_path)
+    # Open the file
+    os.system(file_path)
+
+    # If the only column is inspection results, quit
+    if list(parsed_df.columns) == ['inspection_results']:
+        quit()
 
     # If the raw DataFrame exists
     if df_exists(raw_df):
