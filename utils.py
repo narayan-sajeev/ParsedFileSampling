@@ -283,6 +283,11 @@ def remove_common_cols(parsed_df, raw_df):
         print('Parsed:', unique_rows)
         print('Raw:', len(raw_df))
 
+    file_path = print_file_path()
+
+    # Open the file
+    os.system(file_path)
+
     cols = []
 
     # Remove columns that are common to both the parsed and raw DataFrames
@@ -309,7 +314,14 @@ def remove_common_cols(parsed_df, raw_df):
                 cols.append(col1)
 
     # Remove the columns from the DataFrame
-    parsed_df = parsed_df.drop(cols, axis=1)
+    dropped = parsed_df.drop(cols, axis=1)
+
+    # If all the columns match, quit
+    if len(list(dropped)) == 0:
+        quit()
+
+    # Update the parsed DataFrame
+    parsed_df = dropped
 
     # Replace all 'Non' with None
     parsed_df = parsed_df.applymap(lambda x: None if x == 'Non' else x)
@@ -477,10 +489,6 @@ def df_exists(df):
 
 
 def results(parsed_df, raw_df):
-    file_path = print_file_path()
-
-    # Open the file
-    os.system(file_path)
 
     # If the only column is inspection results, quit
     if list(parsed_df.columns) == ['inspection_results']:
