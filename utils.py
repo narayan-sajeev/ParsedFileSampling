@@ -504,6 +504,6 @@ def results(parsed_df, raw_df):
         last_rows(raw_df)
 
     else:
-        print('Parsed:', len(parsed_df))
+        print('1\t0/%s\t1' % len(parsed_df))
         first_rows(parsed_df)
         last_rows(parsed_df)
