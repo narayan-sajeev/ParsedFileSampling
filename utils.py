@@ -216,7 +216,7 @@ def remove_raw_cols(col_headers):
                    '不合格样品数量（批次）', '监督抽检样品总量（批次）', '住所', '有效期至', '检验方式', '注销原因',
                    '证书编号', '公告文号', '食品亚类（二级）', '食品品种（三级）', '食品细类（四级）', '不合格样品（批次）',
                    '合格样品（批次）', '监督抽检样品（批次）', '备案人', '备案人地址', '备案登记号',
-                   '监督抽检样品总量/批次', '省级匹配任务增加检验项目', '风险等级', '检验机构备注']
+                   '监督抽检样品总量/批次', '省级匹配任务增加检验项目', '风险等级', '检验机构备注', '编号']
 
     # Remove the columns that are in the list of columns to be removed
     return [col_header for col_header in col_headers if col_header not in remove_cols]
