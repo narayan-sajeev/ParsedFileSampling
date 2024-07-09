@@ -56,6 +56,9 @@ def translate(files):
     for e in ext:
         translated = [t.replace(e, '') for t in translated]
 
+    # Replace _ with ' '
+    translated = [t.replace('_', ' ') for t in translated]
+
     # Remove numbers & special characters
     translated = [re.sub(r'[^a-zA-Z\s]', '', t) for t in translated]
 
