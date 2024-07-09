@@ -6,7 +6,6 @@ from random import shuffle
 
 import pandas as pd
 from googletrans import Translator
-from tqdm import tqdm
 
 ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
 DIR = ''
