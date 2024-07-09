@@ -47,31 +47,31 @@ def translate(files):
     # Initialize the translator
     translator = Translator()
 
-    # Initialize the list of translated file names
-    translated = []
+    for f in files:
+        # Translate the file name
+        t = translator.translate(f).text
 
-    # Translate the file names
-    for f in tqdm(files):
-        translated.append(translator.translate(f).text)
+        # Remove file extensions
+        for e in ['.xlsx', '.xls', '.doc', '.docx', '.html', '.pdf']:
+            t = t.replace(e, '')
 
-    # Define the extensions to remove
-    ext = ['.xlsx', '.xls', '.doc', '.docx', '.html', '.pdf']
+        # Replace _ with ' '
+        t = t.replace('_', ' ')
 
-    # Remove file extensions
-    for e in ext:
-        translated = [t.replace(e, '') for t in translated]
+        # Remove numbers & special characters
+        t = re.sub(r'[^a-zA-Z\s]', '', t)
 
-    # Replace _ with ' '
-    translated = [t.replace('_', ' ') for t in translated]
+        # Remove whitespace
+        t = t.replace('   ', ' ').strip()
+        t = t.replace('  ', ' ').strip()
 
-    # Remove numbers & special characters
-    translated = [re.sub(r'[^a-zA-Z\s]', '', t) for t in translated]
+        # Capitalize the first letter of each word
+        t = ' '.join([w.capitalize() for w in t.split()])
 
-    # Remove whitespace
-    translated = [t.replace('  ', ' ').strip() for t in translated]
-
-    # Print all file names
-    print('\n'.join(translated))
+        # If the translated file name is not blank
+        if t:
+            # Print the translated file name
+            print(t)
 
 
 # Convert the pickle file to a DataFrame
