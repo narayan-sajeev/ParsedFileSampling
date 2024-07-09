@@ -6,6 +6,7 @@ from random import shuffle
 
 import pandas as pd
 from googletrans import Translator
+from tqdm import tqdm
 
 ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
 DIR = ''
@@ -46,8 +47,12 @@ def translate(files):
     # Initialize the translator
     translator = Translator()
 
+    # Initialize the list of translated file names
+    translated = []
+
     # Translate the file names
-    translated = [translator.translate(f).text for f in files]
+    for f in tqdm(files):
+        translated.append(translator.translate(f).text)
 
     # Define the extensions to remove
     ext = ['.xlsx', '.xls', '.doc', '.docx', '.html', '.pdf']
