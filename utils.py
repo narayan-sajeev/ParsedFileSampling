@@ -5,6 +5,7 @@ from datetime import datetime
 from random import shuffle
 
 import pandas as pd
+from googletrans import Translator
 
 ROOT_DIR = '/Users/narayansajeev/Desktop/MIT/parsed_files/'
 DIR = ''
@@ -21,7 +22,7 @@ def get_files(PROV):
     # Unique files with corresponding pickle file
     files = [f for f in os.listdir(DIR) if files.count(f) == 1 and files.count(f + '.pkl.gz') == 1]
     # Valid extensions
-    files = [f for f in files if any(e in f for e in ['xls', 'xlsx', 'doc', 'docx', 'html', 'pdf'])]
+    files = [f for f in files if any(e in f for e in ['xlsx', 'xls', 'doc', 'docx', 'html', 'pdf'])]
     # Remove files with invalid characters
     files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒', '╜'])]
 
@@ -34,8 +35,35 @@ def get_files(PROV):
         print('\n'.join(files))
         hr()
         print('\'%s\'' % '\', \''.join(files))
+        hr()
+        translate(files)
 
     quit()
+
+
+# Translate the file names
+def translate(files):
+    # Initialize the translator
+    translator = Translator()
+
+    # Translate the file names
+    translated = [translator.translate(f).text for f in files]
+
+    # Define the extensions to remove
+    ext = ['.xlsx', '.xls', '.doc', '.docx', '.html', '.pdf']
+
+    # Remove file extensions
+    for e in ext:
+        translated = [t.replace(e, '') for t in translated]
+
+    # Remove numbers & special characters
+    translated = [re.sub(r'[^a-zA-Z\s]', '', t) for t in translated]
+
+    # Remove whitespace
+    translated = [t.replace('  ', ' ').strip() for t in translated]
+
+    # Print all file names
+    print('\n'.join(translated))
 
 
 # Convert the pickle file to a DataFrame
