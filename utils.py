@@ -41,6 +41,10 @@ def get_files(PROV):
     quit()
 
 
+def hr():
+    print('*' * 100)
+
+
 # Translate the file names
 def translate(files):
     # Initialize the translator
@@ -73,41 +77,86 @@ def translate(files):
             print(t)
 
 
+def init(PROV, FILE_NAMES, NUM, col_headers):
+    # Set pandas option to display all columns
+    pd.set_option('display.max_columns', None)
+
+    global DIR
+    DIR = ROOT_DIR + PROV
+
+    NUM -= 1
+
+    # Add extension to the file name
+    FILE_NAMES = [f + '.pkl.gz' for f in FILE_NAMES]
+
+    global FILE_NAME
+    FILE_NAME = FILE_NAMES[NUM]
+
+    file_path = print_file_path()
+
+    # Open the file
+    # os.system(file_path)
+
+    raw_df = read_excel()
+    parsed_df = pkl_to_df()
+    col_headers = convert_to_list(col_headers)
+    review_cols = check_substring(parsed_df, col_headers)
+    parsed_df = remove_parsed_cols(parsed_df, review_cols)
+    parsed_df = clean_cols(parsed_df)
+
+    # If the raw DataFrame exists
+    if df_exists(raw_df):
+        raw_columns = remove_raw_cols(raw_df.columns)
+
+        # Select only the columns that are in the raw DataFrame
+        raw_df = raw_df.loc[:, raw_columns]
+
+        raw_df = clean_cols(raw_df)
+
+    return parsed_df, raw_df
+
+
+def print_file_path():
+    path = 'open \'%s\'' % get_path()
+    fname = path.split('/')[-1][:-1]
+    print(fname)
+    return path
+
+
+def get_path():
+    return '%s/%s' % (DIR, FILE_NAME.split('.pkl')[0])
+
+
+def read_excel():
+    # Read the raw Excel file
+    try:
+        raw_df = pd.read_excel(get_path())
+    except:
+        return False
+
+    # Get the index of the first occurrence
+    try:
+        idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
+        # Set the column headers to be the entries in the row that contains '序号'
+        raw_df.columns = raw_df.iloc[idx]
+        # Remove the row that contains '序号'
+        raw_df = raw_df.loc[idx + 1:]
+    except:
+        pass
+
+    # Fill all NaN values with '/'
+    raw_df = raw_df.fillna('/')
+
+    return raw_df
+
+
 # Convert the pickle file to a DataFrame
 def pkl_to_df():
     return pd.read_pickle('%s/%s' % (DIR, FILE_NAME))
 
 
-def get_known_cols():
-    known_cols_fn = '/Users/narayansajeev/Desktop/MIT/known_columns.json'
-    with open(known_cols_fn) as f:
-        return json.load(f)
-
-
-# Remove unnecessary characters from the column headers
-def clean_cols(df=None, headers=None):
-    # Characters to remove
-    remove = ['\n', '\r', '\xa0', ' ', '\u2003']
-    # If the DataFrame exists, get the column headers
-    if df is not None:
-        headers = [str(h) for h in df.columns]
-    # Remove the characters from the column headers
-    for h in headers:
-        for r in remove:
-            h = h.strip().replace(r, '')
-    # If the DataFrame exists, set the column headers to the cleaned column headers
-    if df is not None:
-        df.columns = headers
-        return df
-    # Otherwise, return the cleaned column headers
-    return headers
-
-
-def substring(substr_sets, k):
-    substr_dict = {}
-    for s in substr_sets:
-        substr_dict[s] = any([i in k for i in substr_sets[s]])
-    return substr_dict
+def convert_to_list(col_headers):
+    return col_headers.split('\t')
 
 
 def check_substring(df, col_headers):
@@ -210,6 +259,56 @@ def check_substring(df, col_headers):
     return review_cols
 
 
+def get_known_cols():
+    known_cols_fn = '/Users/narayansajeev/Desktop/MIT/known_columns.json'
+    with open(known_cols_fn) as f:
+        return json.load(f)
+
+
+# Remove unnecessary characters from the column headers
+def clean_cols(df=None, headers=None):
+    # Characters to remove
+    remove = ['\n', '\r', '\xa0', ' ', '\u2003']
+    # If the DataFrame exists, get the column headers
+    if df is not None:
+        headers = [str(h) for h in df.columns]
+    # Remove the characters from the column headers
+    for h in headers:
+        for r in remove:
+            h = h.strip().replace(r, '')
+    # If the DataFrame exists, set the column headers to the cleaned column headers
+    if df is not None:
+        df.columns = headers
+        return df
+    # Otherwise, return the cleaned column headers
+    return headers
+
+
+def remove_raw_cols(col_headers):
+    col_headers = list(col_headers)
+
+    remove_cols = ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市',
+                   '被抽样单位所在盟市', '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号',
+                   '地址', '序', '抽查领域', '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地',
+                   '任务类别', '地市', '检验报告编号', '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位', '样品数量',
+                   '样品编号', '检验标准', '检验判定依据', '注册商标', '检验报告单编号', '型号', '等级',
+                   '不合格样品数量/批次', '合格样品数量/批次', '样品合格率', '样品抽检数量/批次',
+                   '不合格样品数量（批次）', '监督抽检样品总量（批次）', '住所', '有效期至', '检验方式', '注销原因',
+                   '证书编号', '公告文号', '食品亚类（二级）', '食品品种（三级）', '食品细类（四级）', '不合格样品（批次）',
+                   '合格样品（批次）', '监督抽检样品（批次）', '备案人', '备案人地址', '备案登记号',
+                   '监督抽检样品总量/批次', '省级匹配任务增加检验项目', '风险等级', '检验机构备注', '编号']
+
+    # Remove the columns that are in the list of columns to be removed
+    return [col_header for col_header in col_headers if col_header not in remove_cols]
+
+
+def substring(substr_sets, k):
+    substr_dict = {}
+    for s in substr_sets:
+        substr_dict[s] = any([i in k for i in substr_sets[s]])
+    return substr_dict
+
+
 def remove_parsed_cols(df, col_headers):
     keep_cols = ['manufacturer_name', 'manufacturer_address', 'sampled_location_name', 'sampled_location_address',
                  'food_name', 'specifications_model', 'announcement_date', 'production_date',
@@ -241,22 +340,8 @@ def remove_parsed_cols(df, col_headers):
     return empty_df
 
 
-def remove_raw_cols(col_headers):
-    col_headers = list(col_headers)
-
-    remove_cols = ['商标', '备注', '序号', '抽样编号', '购进日期', '被抽样单位省', '被抽样单位盟市',
-                   '被抽样单位所在盟市', '公告网址链接', '产品具体名称', '销售单位/电商', '通告号', '通告日期', '号',
-                   '地址', '序', '抽查领域', '统一社会信用代码', '产品细类', '企业所在市', '抽样单编号', '属地',
-                   '任务类别', '地市', '检验报告编号', '抽查结果', '户外低帮休闲鞋', '采样时间', '计量单位', '样品数量',
-                   '样品编号', '检验标准', '检验判定依据', '注册商标', '检验报告单编号', '型号', '等级',
-                   '不合格样品数量/批次', '合格样品数量/批次', '样品合格率', '样品抽检数量/批次',
-                   '不合格样品数量（批次）', '监督抽检样品总量（批次）', '住所', '有效期至', '检验方式', '注销原因',
-                   '证书编号', '公告文号', '食品亚类（二级）', '食品品种（三级）', '食品细类（四级）', '不合格样品（批次）',
-                   '合格样品（批次）', '监督抽检样品（批次）', '备案人', '备案人地址', '备案登记号',
-                   '监督抽检样品总量/批次', '省级匹配任务增加检验项目', '风险等级', '检验机构备注', '编号']
-
-    # Remove the columns that are in the list of columns to be removed
-    return [col_header for col_header in col_headers if col_header not in remove_cols]
+def df_exists(df):
+    return isinstance(df, pd.DataFrame) and len(df) > 0
 
 
 def remove_common_cols(parsed_df, raw_df):
@@ -361,80 +446,6 @@ def remove_common_cols(parsed_df, raw_df):
     return parsed_df, raw_df
 
 
-def hr():
-    print('*' * 100)
-
-
-def get_path():
-    return '%s/%s' % (DIR, FILE_NAME.split('.pkl')[0])
-
-
-def read_excel():
-    # Read the raw Excel file
-    try:
-        raw_df = pd.read_excel(get_path())
-    except:
-        return False
-
-    # Get the index of the first occurrence
-    try:
-        idx = raw_df[(raw_df == '序号').any(axis=1)].index[0]
-        # Set the column headers to be the entries in the row that contains '序号'
-        raw_df.columns = raw_df.iloc[idx]
-        # Remove the row that contains '序号'
-        raw_df = raw_df.loc[idx + 1:]
-    except:
-        pass
-
-    # Fill all NaN values with '/'
-    raw_df = raw_df.fillna('/')
-
-    return raw_df
-
-
-def convert_to_list(col_headers):
-    return col_headers.split('\t')
-
-
-def init(PROV, FILE_NAMES, NUM, col_headers):
-    # Set pandas option to display all columns
-    pd.set_option('display.max_columns', None)
-
-    global DIR
-    DIR = ROOT_DIR + PROV
-
-    NUM -= 1
-
-    # Add extension to the file name
-    FILE_NAMES = [f + '.pkl.gz' for f in FILE_NAMES]
-
-    global FILE_NAME
-    FILE_NAME = FILE_NAMES[NUM]
-
-    file_path = print_file_path()
-
-    # Open the file
-    os.system(file_path)
-
-    raw_df = read_excel()
-    parsed_df = pkl_to_df()
-    col_headers = convert_to_list(col_headers)
-    review_cols = check_substring(parsed_df, col_headers)
-    parsed_df = remove_parsed_cols(parsed_df, review_cols)
-    parsed_df = clean_cols(parsed_df)
-
-    # If the raw DataFrame exists
-    if df_exists(raw_df):
-        raw_columns = remove_raw_cols(raw_df.columns)
-
-        # Select only the columns that are in the raw DataFrame
-        raw_df = raw_df.loc[:, raw_columns]
-
-        raw_df = clean_cols(raw_df)
-
-    return parsed_df, raw_df
-
-
 def process_date_col(date):
     # If the date column is empty, return None
     if date in ['/', '-', '不详'] or date is None:
@@ -498,33 +509,6 @@ def process_df(df):
     return df
 
 
-def print_file_path():
-    path = 'open \'%s\'' % get_path()
-    fname = path.split('/')[-1][:-1]
-    print(fname)
-    return path
-
-
-def first_rows(df):
-    print()
-    print(df.head())
-    hr()
-
-
-def last_rows(df):
-    if len(df) > 10:
-        print(df.tail())
-        hr()
-
-    elif len(df) > 5:
-        print(df.tail(len(df) - 5))
-        hr()
-
-
-def df_exists(df):
-    return isinstance(df, pd.DataFrame) and len(df) > 0
-
-
 def results(parsed_df, raw_df):
     # If the only column is inspection results, quit
     if list(parsed_df.columns) == ['inspection_results']:
@@ -544,3 +528,19 @@ def results(parsed_df, raw_df):
         print('1\t0/%s\t1' % len(parsed_df))
         first_rows(parsed_df)
         last_rows(parsed_df)
+
+
+def first_rows(df):
+    print()
+    print(df.head())
+    hr()
+
+
+def last_rows(df):
+    if len(df) > 10:
+        print(df.tail())
+        hr()
+
+    elif len(df) > 5:
+        print(df.tail(len(df) - 5))
+        hr()
