@@ -94,9 +94,6 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
 
     file_path = print_file_path()
 
-    # Open the file
-    os.system(file_path)
-
     raw_df = read_excel()
     parsed_df = pkl_to_df()
     col_headers = convert_to_list(col_headers)
@@ -521,6 +518,8 @@ def results(parsed_df, raw_df):
         last_rows(raw_df)
 
     else:
+        # Open the file
+        os.system(print_file_path())
         print('1\t0/%s\t1' % len(parsed_df))
         first_rows(parsed_df)
         last_rows(parsed_df)
