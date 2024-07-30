@@ -18,17 +18,39 @@ def get_files(PROV):
     DIR = ROOT_DIR + PROV
 
     # Retrieve all files in the directory
-    files = os.listdir(DIR)
+    all_files = os.listdir(DIR)
     # Unique files with corresponding pickle file
-    files = [f for f in os.listdir(DIR) if files.count(f) == 1 and files.count(f + '.pkl.gz') == 1]
+    all_files = [f for f in os.listdir(DIR) if all_files.count(f) == 1 and all_files.count(f + '.pkl.gz') == 1]
     # Valid extensions
-    files = [f for f in files if any(e in f for e in ['xlsx', 'xls', 'doc', 'docx', 'html', 'pdf'])]
+    all_files = [f for f in all_files if any(e in f for e in ['xlsx', 'xls', 'doc', 'docx', 'html', 'pdf'])]
     # Remove files with invalid characters
-    files = [f for f in files if not any(c in f for c in ['http', '商', '饮', '酒', '╜'])]
+    all_files = [f for f in all_files if not any(c in f for c in ['http', '商', '饮', '酒', '╜'])]
+
+    shuffle(all_files)
+
+    files = []
+
+    translations = []
+
+    # Loop through the files
+    for file in all_files:
+
+        # Translate the file name
+        translated = translate(file)
+
+        # If the translation contains 'Food', 'Sample' or 'Agricultur'
+        if any([t in translated for t in ['Food', 'Sample', 'Agricultur']]):
+            # Add the file to the list of files
+            files.append(file)
+            # Add the translation to the list of translations
+            translations.append(translated)
+
+        # If the list of translations is long enough, break
+        if len(files) >= FILES_PER_PROV:
+            break
 
     # Randomly select from valid files
-    shuffle(files)
-    files = sorted(files[:FILES_PER_PROV])
+    files = sorted(files)
 
     # Print the files
     if files:
@@ -36,7 +58,7 @@ def get_files(PROV):
         hr()
         print('\'%s\'' % '\', \''.join(files))
         hr()
-        translate(files)
+        print('\n'.join(translations))
 
     quit()
 
@@ -46,35 +68,32 @@ def hr():
 
 
 # Translate the file names
-def translate(files):
+def translate(file):
     # Initialize the translator
     translator = Translator()
 
-    for f in files:
-        # Translate the file name
-        t = translator.translate(f).text
+    # Translate the file name
+    t = translator.translate(file).text
 
-        # Remove file extensions
-        for e in ['.xlsx', '.xls', '.doc', '.docx', '.html', '.pdf']:
-            t = t.replace(e, '')
+    # Remove file extensions
+    for e in ['.xlsx', '.xls', '.doc', '.docx', '.html', '.pdf']:
+        t = t.replace(e, '')
 
-        # Replace _ with ' '
-        t = t.replace('_', ' ')
+    # Replace _ with ' '
+    t = t.replace('_', ' ')
 
-        # Remove numbers & special characters
-        t = re.sub(r'[^a-zA-Z\s]', '', t)
+    # Remove numbers & special characters
+    t = re.sub(r'[^a-zA-Z\s]', '', t)
 
-        # Remove whitespace
-        t = t.replace('   ', ' ').strip()
-        t = t.replace('  ', ' ').strip()
+    # Remove whitespace
+    t = t.replace('   ', ' ').strip()
+    t = t.replace('  ', ' ').strip()
 
-        # Capitalize the first letter of each word
-        t = ' '.join([w.capitalize() for w in t.split()])
+    # Capitalize the first letter of each word
+    t = ' '.join([w.capitalize() for w in t.split()])
 
-        # If the translated file name is not blank
-        if t:
-            # Print the translated file name
-            print(t)
+    # If the translated file name is not blank
+    return t if t else ''
 
 
 def init(PROV, FILE_NAMES, NUM, col_headers):
