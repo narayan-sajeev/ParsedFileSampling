@@ -95,7 +95,7 @@ def init(PROV, FILE_NAMES, NUM, col_headers):
     file_path = print_file_path()
 
     # Open the file
-    # os.system(file_path)
+    os.system(file_path)
 
     raw_df = read_excel()
     parsed_df = pkl_to_df()
@@ -313,7 +313,7 @@ def remove_parsed_cols(df, col_headers):
     keep_cols = ['manufacturer_name', 'manufacturer_address', 'sampled_location_name', 'sampled_location_address',
                  'food_name', 'specifications_model', 'announcement_date', 'production_date',
                  'product_classification', 'task_source_or_project_name', 'testing_agency', 'adulterant',
-                 'inspection_results', 'failing_results', 'test_outcome', 'legal_limit']
+                 'failing_results', 'test_outcome', 'legal_limit']
 
     # Select only the existing columns from the DataFrame
     df = df[[col for col in keep_cols if col in df.columns]]
@@ -341,7 +341,7 @@ def remove_parsed_cols(df, col_headers):
 
 
 def df_exists(df):
-    return isinstance(df, pd.DataFrame) and len(df) > 0
+    return isinstance(df, pd.DataFrame) and not df.empty
 
 
 def remove_common_cols(parsed_df, raw_df):
@@ -510,10 +510,6 @@ def process_df(df):
 
 
 def results(parsed_df, raw_df):
-    # If the only column is inspection results, quit
-    if list(parsed_df.columns) == ['inspection_results']:
-        quit()
-
     # If the raw DataFrame exists
     if df_exists(raw_df):
         # Print the first rows of the DataFrames
