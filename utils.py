@@ -231,8 +231,10 @@ def remove_parsed_cols(df, col_headers):
 
     col_headers = sorted(col_headers)
 
+    headers_as_str = ''.join(col_headers)
+
     # Print the removed columns
-    if len(removed_cols) > 0 and len(col_headers) > 0:
+    if len(removed_cols) > 0 and len(headers_as_str) > 0:
         print('\'%s\'' % ('\', \''.join(col_headers)))
         print(removed_cols)
 
