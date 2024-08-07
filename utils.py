@@ -276,8 +276,7 @@ def check_substring(df, col_headers):
 
 
 def get_known_cols():
-    known_cols_fn = '/Users/narayansajeev/Desktop/MIT/known_columns.json'
-    with open(known_cols_fn) as f:
+    with open('known_columns.json') as f:
         return json.load(f)
 
 
